@@ -28,6 +28,8 @@ public class Student extends User {
     public String getMajor() { return major; }
     public void setMajor(String major) { this.major = major; }
 
+    public List<Application> getApplications(){return applications;}
+
     // functions
 
     public boolean applyInternship(Internship internship) {
@@ -70,10 +72,7 @@ public class Student extends User {
     }
     public boolean reqWithdrawal(Application application) {
         if (application == null) return false;
-        if (!applications.contains(application)) return false;
-
-        return application.requestWithdrawal();
-
+        return applications.contains(application);
     }
     public boolean canApply() {
         long activeCount = applications.stream()

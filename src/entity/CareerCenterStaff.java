@@ -23,11 +23,10 @@ public class CareerCenterStaff extends User {
         return approve;
     }
     public boolean approveWithdrawal(Application application, boolean approve) {
-        if (approve && application.approveWithdrawal()){
+        if (approve){
             application.updateStatus(ApplicationStatus.WITHDRAWN);
             return true;
         }
-        application.rejectWithdrawal();
         return false;
     }
 

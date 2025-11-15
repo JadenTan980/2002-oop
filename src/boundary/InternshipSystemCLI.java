@@ -64,6 +64,7 @@ public class InternshipSystemCLI {
             switch (choice){
                 case "1" -> student.displayDetails();
                 case "2" -> showInternshipOpportunities(student);
+                case "5" -> student.changePassword();
                 case "6" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
             }  
