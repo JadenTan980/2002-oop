@@ -243,7 +243,6 @@ public class InternshipSystemCLI {
             return;
         }
         String[] record = getCompanyRepRecord(email);
-
         if (!isApprovedStatus(record[6])) {
             System.out.println("Your account is pending approval. Please wait for Career Center Staff to approve your registration.");
             return;
