@@ -1,4 +1,5 @@
 package boundary;
+import control.InternshipManager;
 import control.UserDataLoader;
 import entity.*;
 import java.io.BufferedReader;
@@ -52,7 +53,12 @@ public class InternshipSystemCLI {
             case "1" -> student.displayDetails();
         }
      }
-    public void displayRepMenu() { }
+    public void displayRepMenu() {
+        System.out.println("What do you want to do?");
+        System.out.println("(1) Display details");
+        System.out.println("(2) Create internship");
+        System.out.println("(3) Manage internship applications");
+    }
     public void displayStaffMenu() { }
 
     private void handleStudentLogin() {
@@ -325,6 +331,7 @@ public class InternshipSystemCLI {
 
     public static void main(String[] args){
         InternshipSystemCLI cli = new InternshipSystemCLI();
+        InternshipManager manager = new InternshipManager();
         cli.loadInitialData();
         System.out.println("Welcome to the Internship Management System.");
         boolean running = true;
