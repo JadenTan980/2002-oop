@@ -19,7 +19,7 @@ public abstract class User {
         // to be added later, returning any exceptions good for edge cases
         this.name = name;
     }
-
+    public void setPassword(String password){this.password = password;}
     public boolean login() { return true; }
     public boolean verifyPassword(String password) { return true; }
     public void changePassword(String oldPw,String newPw) {

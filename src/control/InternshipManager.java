@@ -43,7 +43,7 @@ public class InternshipManager {
         String level = i.getLevel();
         if (level == null) return false;
 
-        if (s.getYear() <= 2){
+        if (s.getYear().equals("2") || s.getYear().equals("1")){
             return level.equalsIgnoreCase("Basic");
         }
 

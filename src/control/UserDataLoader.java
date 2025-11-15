@@ -20,7 +20,7 @@ public class UserDataLoader {
 
     public List<Student> loadStudents() {
         return readCsv(STUDENT_CSV, 5).stream()
-                .map(c -> new Student(c[0].trim(), c[1].trim(), "", Integer.parseInt(c[3].trim()), c[2].trim()))
+                .map(c -> new Student(c[0].trim(), c[1].trim(), "", c[3].trim(), c[2].trim()))
                 .collect(Collectors.toList());
     }
 
