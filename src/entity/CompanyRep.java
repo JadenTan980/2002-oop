@@ -187,6 +187,7 @@ public class CompanyRep extends User {
         System.out.println("Name: " + getName());
         System.out.println("Company: " + company.getCompanyName());
         System.out.println("Department: " + getDepartment());
+        System.out.println("Email: " + getEmail());
     }
 }
 
