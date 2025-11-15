@@ -40,14 +40,6 @@ public class InternshipSystemCLI {
     public void displayRepMenu() { }
     public void displayStaffMenu() { }
 
-    public boolean register() { return false; }
-    public Internship createInternship(String title, String description, String level, String preferredMajor,
-                                       java.util.Date openDate, java.util.Date closeDate, int numSlots) { return null; }
-    public void toggleVisibility(Internship internship) { }
-    public boolean approveApplication(Application application) { return false; }
-    public boolean rejectApplication(Application application) { return false; }
-    public java.util.List<Application> viewApplications(Internship internship) { return null; }
-
     private void handleStudentLogin() {
         System.out.print("Enter Student ID: ");
         String id = scanner.nextLine().trim();
