@@ -67,6 +67,7 @@ public class InternshipSystemCLI {
         String password = scanner.nextLine().trim();
         if (!user.verifyPassword(password)){
             System.out.println("Incorrect Password");
+            return;
         }
         
         if (user == null) {
@@ -148,7 +149,7 @@ public class InternshipSystemCLI {
             System.out.print("Enter Email: ");
             String email = scanner.nextLine().trim();
 
-            String approved = "0";
+            String approved = "false";
         
             File file = new File("data/sample_company_representative_list``.csv");
             boolean writeHeader = !file.exists() || file.length() == 0;
@@ -163,7 +164,6 @@ public class InternshipSystemCLI {
         
                 // Build CSV row manually
                 String record = String.join(",", companyrepid,name,companyname,department,position,email,approved);
-        
                 writer.write(record);
                 writer.newLine();
                 writer.flush();
@@ -229,6 +229,7 @@ public class InternshipSystemCLI {
         String password = scanner.nextLine().trim();
         if (!user.verifyPassword(password)){
             System.out.println("Incorrect Password");
+            return;
         }
         // verify password is correct
         if (!email.endsWith(".com")) {
@@ -269,6 +270,7 @@ public class InternshipSystemCLI {
         String password  = scanner.nextLine().trim();
         if (!user.verifyPassword(password)){
             System.out.println("Incorrect Password");
+            return;
         }
         if (!email.endsWith("@ntu.edu.sg")) {
             System.out.println("Invalid email format for career staff.");
