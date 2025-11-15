@@ -54,8 +54,14 @@ public class InternshipSystemCLI {
             switch (choice){
                 case "1" -> student.displayDetails();
                 case "2" -> showInternshipOpportunities(student);
-                case "3" -> student.viewApplications();
-                case "4" -> student.reqWithdrawal();
+                case "3" -> {
+                    syncStudentApplications(student);
+                    student.viewApplications();
+                }
+                case "4" -> {
+                    syncStudentApplications(student);
+                    student.reqWithdrawal();
+                }
                 case "5" -> student.changePassword();
                 case "6" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
@@ -78,9 +84,20 @@ public class InternshipSystemCLI {
             String choice = scanner.nextLine();
             switch (choice){
                 case "1" -> rep.displayDetails();
-                case "2" -> rep.createInternship();
-                case "3" -> rep.manageApplications();
-                case "4" -> rep.toggleVisibility();
+                case "2" -> {
+                    Internship created = rep.createInternship();
+                    if (created != null && !internshipManager.getInternships().contains(created)) {
+                        internshipManager.getInternships().add(created);
+                    }
+                }
+                case "3" -> {
+                    syncRepInternships(rep);
+                    rep.manageApplications();
+                }
+                case "4" -> {
+                    syncRepInternships(rep);
+                    rep.toggleVisibility();
+                }
                 case "5" -> rep.changePassword();
                 case "6" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
@@ -95,16 +112,19 @@ public class InternshipSystemCLI {
         System.out.println("(1) Display details");
         System.out.println("(2) Manage internship requests");
         System.out.println("(3) Manage student withdrawal requests");
-        System.out.println("(4) View internship information");
-        System.out.println("(5) Change password");
-        System.out.println("(6) Exit");
+        System.out.println("(4) Manage Company Rep account creation");
+        System.out.println("(5) View internship information");
+        System.out.println("(6) Generate reports");
+        System.out.println("(7) Change password");
+        System.out.println("(8) Exit");
         while (running){
             System.out.println("Enter choice: ");
             String choice = scanner.nextLine();
             switch (choice){
                 case "1" -> staff.displayDetails();
-                case "5" -> staff.changePassword();
-                case "6" -> running = false;
+                case "4" -> handleRepAuthorization(staff);
+                case "7" -> staff.changePassword();
+                case "8" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
             }
         }
@@ -156,6 +176,54 @@ public class InternshipSystemCLI {
         } catch (NumberFormatException e) {
             System.out.println("Invalid input. Returning to menu.");
         }
+    }
+    private void syncStudentApplications(Student student) { //prunes entries whose internships do not exist in manager
+        if (student == null) return;
+        student.getApplications().removeIf(app ->
+                app == null || app.getInternship() == null ||
+                        !internshipManager.getInternships().contains(app.getInternship()));
+    }
+
+    private void syncRepInternships(CompanyRep rep) { //pulls internships owned by rep
+        ArrayList<Internship> owned = new ArrayList<>();
+        for (Internship internship : internshipManager.getInternships()) {
+            if (internship.getCompany() != null && internship.getCompany().equals(rep.getCompany())) {
+                owned.add(internship);
+            }
+        }
+        rep.setInternships(owned);
+    }
+
+    private void handleRepAuthorization(CareerCenterStaff staff) {
+        ArrayList<CompanyRep> pending = new ArrayList<>();
+        for (User user : users) {
+            if (user instanceof CompanyRep rep && !rep.isAuthorised()) {
+                pending.add(rep);
+            }
+        }
+        if (pending.isEmpty()) {
+            System.out.println("No pending company representatives.");
+            return;
+        }
+        System.out.println("Select a representative to review:");
+        for (int i = 0; i < pending.size(); i++) {
+            System.out.printf("%d. %s (%s)%n", i + 1, pending.get(i).getName(), pending.get(i).getEmail());
+        }
+        System.out.print("Choice: ");
+        int selection;
+        try {
+            selection = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        if (selection < 1 || selection > pending.size()) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        System.out.print("Approve? (y/n): ");
+        boolean approve = scanner.nextLine().trim().equalsIgnoreCase("y");
+        staff.authoriseRep(pending.get(selection - 1), approve);
     }
     private String safeValue(String value) {
         return (value == null || value.isBlank()) ? "N/A" : value;

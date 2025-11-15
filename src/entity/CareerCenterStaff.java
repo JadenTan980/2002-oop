@@ -34,14 +34,13 @@ public class CareerCenterStaff extends User {
 
 
     public boolean authoriseRep(CompanyRep rep, boolean approve) {
-        if (approve){
-            rep.setAuthorised(true);
-            return true;
+        if (rep == null) {
+            System.out.println("No representative selected.");
+            return false;
         }
-        else {
-            rep.setAuthorised(false);
-            return false;   
-        }
+        rep.setAuthorised(approve);
+        System.out.println(rep.getName() + (approve ? " has been approved." : " has been rejected."));
+        return approve;
     }
 
     public boolean approveInternship(Internship internship, boolean approve) {
