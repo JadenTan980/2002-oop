@@ -303,7 +303,7 @@ public class InternshipSystemCLI {
             return;
         }
 
-        displayStaffMenu();
+        displayRepMenu((CompanyRep)user);
         System.out.println("Welcome, " + user.getName());
         displayRepMenu((CompanyRep)user);
 
@@ -331,7 +331,7 @@ public class InternshipSystemCLI {
         currentUser = user;
         displayStaffMenu((CareerCenterStaff)user);
         System.out.println("Welcome, " + user.getName());
-        displayStaffMenu();
+        displayStaffMenu((CareerCenterStaff)user);
         currentUser = null;
     }
 
