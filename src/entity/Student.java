@@ -9,12 +9,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Student extends User {
-    private int year;
+    private String year;
     private String major;
 
     private final List<Application> applications = new ArrayList<>();
 
-    public Student(String userId, String name, String password, int year, String major) {
+    public Student(String userId, String name, String password, String year, String major) {
         super(userId, name, password);
         this.year = year;
         this.major = major;
@@ -22,8 +22,8 @@ public class Student extends User {
 
 
 
-    public int getYear() { return year; }
-    public void setYear(int year) { this.year = year; }
+    public String getYear() { return year; }
+    public void setYear(String year) { this.year = year; }
 
     public String getMajor() { return major; }
     public void setMajor(String major) { this.major = major; }

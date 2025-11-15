@@ -18,7 +18,7 @@ public class InternshipSystemCLI {
     private static final String COMPANY_REP_CSV = "data/sample_company_representative_list.csv";
     private static final String COMPANY_REP_HEADER = "CompanyRepID,Name,CompanyName,Department,Position,Email,Approved";
     private ArrayList<User> users = new ArrayList<>();
-    private User currentUser;;
+    private User currentUser;
     private final Scanner scanner = new Scanner(System.in);
     private final UserDataLoader loader = new UserDataLoader();
 
@@ -79,26 +79,20 @@ public class InternshipSystemCLI {
             System.out.println("Your account is pending approval. Please wait for Career Center Staff to approve your registration.");
             return;
         }
-        CompanyRep rep = ensureCompanyRepUser(record);
-        if (rep == null) {
-            System.out.println("Unable to load company representative profile.");
-            return;
-        }
-        rep.setAuthorised(true);
-        currentUser = rep;
-        System.out.println("Welcome, " + rep.getName());
-        displayRepMenu();
-        currentUser = null;
+
+
     }
 
     private void handleCareerStaffLogin() {
         System.out.print("Enter Career Staff ID: ");
         String email = scanner.nextLine().trim();
+        System.out.print("Password: ");
+        String password  = scanner.nextLine().trim();
         if (!email.endsWith("@ntu.edu.sg")) {
             System.out.println("Invalid email format for career staff.");
             return;
         }
-        User user = findUserById(email, CareerCenterStaff.class);
+        User user = findUserById(email, password, CareerCenterStaff.class);
         if (user == null) {
             System.out.println("Career staff not found.");
             return;
@@ -109,9 +103,9 @@ public class InternshipSystemCLI {
         currentUser = null;
     }
 
-    private User findUserById(String id, Class<? extends User> type) { // checks if user is of correct type
+    private User findUserById(String id, String password, Class<? extends User> type) { // checks if user is of correct type
         for (User user : users) {
-            if (type.isInstance(user) && user.getId().equalsIgnoreCase(id)) {
+            if (type.isInstance(user) && user.getId().equalsIgnoreCase(id) && user.getId().equals(password)) {
                 return user;
             }
         }
@@ -181,17 +175,17 @@ public class InternshipSystemCLI {
         }
     }
 
-    private CompanyRep ensureCompanyRepUser(String[] record) { // load or create CompanyRep user
-        String email = record[5];
-        User existing = findUserById(email, CompanyRep.class);
-        if (existing != null) {
-            return (CompanyRep) existing;
-        }
-        CompanyRep rep = new CompanyRep(email, record[1], "");
-        rep.setAuthorised(isApprovedStatus(record[6]));
-        users.add(rep);
-        return rep;
-    }
+    // private CompanyRep ensureCompanyRepUser(String[] record) { // load or create CompanyRep user
+    //     String email = record[5];
+    //     User existing = findUserById(email, CompanyRep.class);
+    //     if (existing != null) {
+    //         return (CompanyRep) existing;
+    //     }
+    //     CompanyRep rep = new CompanyRep(email, record[1], "");
+    //     rep.setAuthorised(isApprovedStatus(record[6]));
+    //     users.add(rep);
+    //     return rep;
+    // }
 
     private boolean isApprovedStatus(String status) {
         return "true".equalsIgnoreCase(status) || "approved".equalsIgnoreCase(status);
