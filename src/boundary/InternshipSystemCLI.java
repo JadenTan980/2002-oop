@@ -2,6 +2,9 @@ package boundary;
 import control.UserDataLoader;
 import entity.*;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,14 +43,6 @@ public class InternshipSystemCLI {
     public void displayRepMenu() { }
     public void displayStaffMenu() { }
 
-    public boolean register() { return false; }
-    public Internship createInternship(String title, String description, String level, String preferredMajor,
-                                       java.util.Date openDate, java.util.Date closeDate, int numSlots) { return null; }
-    public void toggleVisibility(Internship internship) { }
-    public boolean approveApplication(Application application) { return false; }
-    public boolean rejectApplication(Application application) { return false; }
-    public java.util.List<Application> viewApplications(Internship internship) { return null; }
-
     private void handleStudentLogin() {
         System.out.print("Enter Student ID: ");
         String id = scanner.nextLine().trim();
@@ -60,11 +55,112 @@ public class InternshipSystemCLI {
             System.out.println("Student not found.");
             return;
         }
+        
         currentUser = user;
         System.out.println("Welcome, " + user.getName());
         displayStudentMenu();
         currentUser = null;
     }
+
+    private void register() {
+        System.out.println("I am a:\n1. Student\n2. Company Representative\n3. Career Center Staff\n4. Return");
+        String choice = scanner.nextLine();
+        if (choice.equals("1")){ 
+            System.out.println("=== Student Registration ===");
+        
+            System.out.print("Enter Student ID: ");
+            String studentID = scanner.nextLine().trim();
+        
+            System.out.print("Enter Name: ");
+            String name = scanner.nextLine().trim();
+        
+            System.out.print("Enter Major: ");
+            String major = scanner.nextLine().trim();
+        
+            System.out.print("Enter Year of Study: ");
+            String year = scanner.nextLine();
+        
+            System.out.print("Enter Email: ");
+            String email = scanner.nextLine().trim();
+        
+            File file = new File("data/sample_student_list.csv");
+            boolean writeHeader = !file.exists() || file.length() == 0;
+        
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+        
+                // Write column header ONLY if file is new or empty
+                if (writeHeader) {
+                    writer.write("StudentID,Name,Major,Year,Email");
+                    writer.newLine();
+                }
+        
+                // Build CSV row manually
+                String record = String.join(",", studentID, name, major, year, email);
+        
+                writer.write(record);
+                writer.newLine();
+                writer.flush();
+        
+                // Add to in-memory users list
+                Student student = new Student(studentID, name, major, Integer.parseInt(year), email);
+                users.add(student);
+        
+                System.out.println("Registration completed! Welcome, " + name);
+        
+            } catch (IOException e) {
+                System.out.println("Error writing student record: " + e.getMessage());
+            }
+        }
+
+        if (choice.equals("2")){
+            System.out.println("=== Company Representative Registration ===");
+        
+            System.out.print("Enter Company Rep ID: ");
+            String companyrepid = scanner.nextLine().trim();
+        
+            System.out.print("Enter Name: ");
+            String name = scanner.nextLine().trim();
+
+            System.out.print("Enter Company Name: ");
+            String companyname = scanner.nextLine().trim();
+        
+            System.out.print("Enter Department: ");
+            String department = scanner.nextLine().trim();
+        
+            System.out.print("Enter Position: ");
+            String position = scanner.nextLine();
+        
+            System.out.print("Enter Email: ");
+            String email = scanner.nextLine().trim();
+
+            String approved = "0";
+        
+            File file = new File("data/sample_company_representative_list.csv");
+            boolean writeHeader = !file.exists() || file.length() == 0;
+        
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+        
+                // Write column header ONLY if file is new or empty
+                if (writeHeader) {
+                    writer.write("CompanyRepID,Name,CompanyName,Department,Position,Email,Approved");
+                    writer.newLine();
+                }
+        
+                // Build CSV row manually
+                String record = String.join(",", companyrepid,name,companyname,department,position,email,approved);
+        
+                writer.write(record);
+                writer.newLine();
+                writer.flush();
+        
+                System.out.println("Registration completed! Welcome, " + name);
+        
+            } catch (IOException e) {
+                System.out.println("Error writing student record: " + e.getMessage());
+            }
+        }
+    }
+    
 
     private void handleCompanyRepLogin() {
         System.out.print("Enter Company Rep email: ");
@@ -225,6 +321,7 @@ public class InternshipSystemCLI {
             System.out.println("1. Student");
             System.out.println("2. Company Representative");
             System.out.println("3. Career Center Staff");
+            System.out.println("4. Register a new user");
             System.out.println("0. Exit");
             System.out.print("Choice: ");
             String choice = cli.scanner.nextLine().trim();
@@ -238,12 +335,17 @@ public class InternshipSystemCLI {
                 case "3":
                     cli.handleCareerStaffLogin();
                     break;
+                case "4":
+                    cli.register();
+                    break;
                 case "0":
                     running = false;
                     break;
                 default:
                     System.out.println("Invalid choice. Try again.");
             }
+
+        // if successfully log in then can access manager
         }
         System.out.println("Goodbye.");
     }
