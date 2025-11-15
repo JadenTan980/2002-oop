@@ -100,7 +100,7 @@ public class InternshipSystemCLI {
                 writer.write(record);
                 writer.newLine();
                 writer.flush();
-        
+
                 // Add to in-memory users list
                 Student student = new Student(studentID, name, major, Integer.parseInt(year), email);
                 users.add(student);
