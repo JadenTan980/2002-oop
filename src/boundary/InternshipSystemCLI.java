@@ -57,6 +57,7 @@ public class InternshipSystemCLI {
             switch (choice){
                 case "1" -> student.displayDetails();
                 case "2" -> showInternshipOpportunities(student);
+                case "4" -> student.reqWithdrawal();
                 case "5" -> student.changePassword();
                 case "6" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
@@ -298,7 +299,7 @@ public class InternshipSystemCLI {
 
     public static void main(String[] args){
         InternshipSystemCLI cli = new InternshipSystemCLI();
-        cli.loadInitialData();
+        cli.loadInitialData(); //Loads all users from csv, password set to "password by" default
         System.out.println("Welcome to the Internship Management System.");
         boolean running = true;
         while (running) {

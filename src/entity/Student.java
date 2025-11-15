@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -70,9 +71,48 @@ public class Student extends User {
 
         return true;
     }
-    public boolean reqWithdrawal(Application application) {
-        if (application == null) return false;
-        return applications.contains(application);
+    public boolean reqWithdrawal() {
+        if (applications.isEmpty()) {
+            System.out.println("You have no applications to withdraw.");
+            return false;
+        }
+
+        System.out.println("Select an application to request withdrawal:");
+        for (int i = 0; i < applications.size(); i++) {
+            Application application = applications.get(i);
+            System.out.printf("%d. %s (%s)%n",
+                    i + 1,
+                    application.getInternship().getTitle(),
+                    application.getStatus());
+        }
+        System.out.println("Enter choice: ");
+
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine().trim();
+        int selection;
+        try {
+            selection = Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid selection.");
+            return false;
+        }
+
+        if (selection < 1 || selection > applications.size()) {
+            System.out.println("Invalid selection.");
+            return false;
+        }
+
+        Application selected = applications.get(selection - 1);
+        ApplicationStatus status = selected.getStatus();
+        if (status == ApplicationStatus.WITHDRAWN || status == ApplicationStatus.ACCEPTED) {
+            System.out.println("This application cannot be withdrawn.");
+            return false;
+        }
+
+        selected.setWithdrawn(true);
+        selected.updateStatus(ApplicationStatus.PENDING_WITHDRAWAL);
+        System.out.println("Withdrawal requested for " + selected.getInternship().getTitle() + ".");
+        return true;
     }
     public boolean canApply() {
         long activeCount = applications.stream()
