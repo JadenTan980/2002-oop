@@ -77,7 +77,25 @@ public class InternshipSystemCLI {
             }
         }
     }
-    public void displayStaffMenu() { }
+    public void displayStaffMenu(CareerCenterStaff staff) { 
+        boolean running = true;
+        System.out.println("What do you want to do?");
+        System.out.println("(1) Display details");
+        System.out.println("(2) Manage internship opportunities");
+        System.out.println("(3) Change student withdrawal requests");
+        System.out.println("(4) View internship information");
+        System.out.println("(5) Change password");
+        System.out.println("(6) Exit");
+        while (running){
+            System.out.println("Enter choice: ");
+            String choice = scanner.nextLine();
+            switch (choice){
+                case "1" -> staff.displayDetails();
+                case "5" -> staff.changePassword();
+                default -> System.out.println("Invalid choice. Try again.");
+            }
+        }
+    }
 
     private void handleStudentLogin() {
         System.out.print("Enter Student ID: ");

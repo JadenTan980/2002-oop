@@ -46,6 +46,10 @@ public class CareerCenterStaff extends User {
             }
         }
     }
+
+    public void displayDetails(){
+        System.out.println("");
+    }
 }
 
 
