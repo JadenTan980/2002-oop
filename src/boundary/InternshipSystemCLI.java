@@ -46,7 +46,8 @@ public class InternshipSystemCLI {
         System.out.println("(2) View internship opportunities");
         System.out.println("(3) View internship application status");
         System.out.println("(4) Request application withdrawal");
-        System.out.println("(5) Exit");
+        System.out.println("(5) Change Password");
+        System.out.println("(6) Exit");
         System.out.println("Enter choice: ");
         String choice = scanner.nextLine();
         switch (choice){
