@@ -165,23 +165,13 @@ public class InternshipSystemCLI {
         }
 
         String[] record = new String[]{
-                generateCompanyRepId(),
-                name,
-                company,
-                department,
-                position,
-                email,
-                "false"
+                "REP-" + System.currentTimeMillis(),name,company,department,position,email,"false"
         };
 
         if (appendCompanyRepRecord(record)) {
             return record;
         }
         return null;
-    }
-
-    private String generateCompanyRepId() {
-        return "REP-" + System.currentTimeMillis(); //Generates unique ID based on timestamp
     }
 
     private boolean appendCompanyRepRecord(String[] record) { // append to CSV
@@ -229,20 +219,11 @@ public class InternshipSystemCLI {
             System.out.print("Choice: ");
             String choice = cli.scanner.nextLine().trim();
             switch (choice) {
-                case "1":
-                    cli.handleStudentLogin();
-                    break;
-                case "2":
-                    cli.handleCompanyRepLogin();
-                    break;
-                case "3":
-                    cli.handleCareerStaffLogin();
-                    break;
-                case "0":
-                    running = false;
-                    break;
-                default:
-                    System.out.println("Invalid choice. Try again.");
+                case "1" -> cli.handleStudentLogin();
+                case "2" -> cli.handleCompanyRepLogin();
+                case "3" -> cli.handleCareerStaffLogin();
+                case "0" -> running = false;
+                default -> System.out.println("Invalid choice. Try again.");
             }
         }
         System.out.println("Goodbye.");
