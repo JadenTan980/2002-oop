@@ -29,16 +29,17 @@ public abstract class User {
             return false;
         }
         }
-    public void changePassword(String oldPw,String newPw) {
+    public void changePassword() {
         System.out.println("Enter old password: ");
         Scanner scanner = new Scanner(System.in);
         String pw = scanner.nextLine(); 
-        if (!pw.equals(oldPw)) {
+        if (!pw.equals(this.password)) {
             System.out.println("Incorrect old password. Password change failed.");
         }
         else {
+            System.out.print("Enter new password");
+            this.password = scanner.nextLine();
             System.out.println("Password changed successfully.");
-            this.password = newPw;
         }
     }
 }
