@@ -26,7 +26,7 @@ public class UserDataLoader {
 
     public List<CareerCenterStaff> loadStaff() {
         return readCsv(STAFF_CSV, 5).stream()
-                .map(c -> new CareerCenterStaff(c[4].trim(), c[1].trim(), ""))
+                .map(c -> new CareerCenterStaff(c[0].trim(),c[1].trim(),"password",c[2].trim(),c[3].trim(),c[4].trim()))
                 .collect(Collectors.toList());
     }
 

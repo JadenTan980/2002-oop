@@ -302,8 +302,6 @@ public class InternshipSystemCLI {
             System.out.println("Your account is pending approval. Please wait for Career Center Staff to approve your registration.");
             return;
         }
-
-        displayStaffMenu();
         System.out.println("Welcome, " + user.getName());
         displayRepMenu((CompanyRep)user);
 
@@ -331,7 +329,6 @@ public class InternshipSystemCLI {
         currentUser = user;
         displayStaffMenu((CareerCenterStaff)user);
         System.out.println("Welcome, " + user.getName());
-        displayStaffMenu();
         currentUser = null;
     }
 
