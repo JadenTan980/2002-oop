@@ -310,20 +310,12 @@ public class InternshipSystemCLI {
             System.out.print("Choice: ");
             String choice = cli.scanner.nextLine().trim();
             switch (choice) {
-                case "1":
-                    cli.handleStudentLogin();
-                    break;
-                case "2":
-                    cli.handleCompanyRepLogin();
-                    break;
-                case "3":
-                    cli.handleCareerStaffLogin();
-                    break;
-                case "0":
-                    running = false;
-                    break;
-                default:
-                    System.out.println("Invalid choice. Try again.");
+                case "1" -> cli.handleStudentLogin();
+                case "2" -> cli.handleCompanyRepLogin();
+                case "3" -> cli.handleCareerStaffLogin();
+                case "4" -> cli.register();
+                case "0" -> running = false;
+                default -> System.out.println("Invalid choice. Try again.");
             }
 
         // if successfully log in then can access manager
