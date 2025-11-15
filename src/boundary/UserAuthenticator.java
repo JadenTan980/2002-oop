@@ -5,6 +5,9 @@ import entity.CompanyRep;
 import entity.Student;
 import entity.User;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,6 +99,137 @@ public class UserAuthenticator {
         cli.displayStaffMenu((CareerCenterStaff)user);
         System.out.println("Welcome, " + user.getName());
         cli.setCurrentUser(null);
+    }
+
+    public void register() {
+        System.out.println("I am a:\n1. Student\n2. Company Representative\n3. Career Center Staff\n4. Return");
+        String choice = scanner.nextLine();
+        if (choice.equals("1")){
+            System.out.println("=== Student Registration ===");
+
+            System.out.print("Enter Student ID: ");
+            String studentID = scanner.nextLine().trim();
+
+            System.out.print("Enter Name: ");
+            String name = scanner.nextLine().trim();
+
+            System.out.print("Enter Major: ");
+            String major = scanner.nextLine().trim();
+
+            System.out.print("Enter Year of Study: ");
+            String year = scanner.nextLine();
+
+            System.out.print("Enter Email: ");
+            String email = scanner.nextLine().trim();
+
+            File file = new File("data/sample_student_list.csv");
+            boolean writeHeader = !file.exists() || file.length() == 0;
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+
+                if (writeHeader) {
+                    writer.write("StudentID,Name,Major,Year,Email");
+                    writer.newLine();
+                }
+
+                String record = String.join(",", studentID, name, major, year, email);
+
+                writer.write(record);
+                writer.newLine();
+                writer.flush();
+
+                System.out.println("Registration completed! Welcome, " + name);
+
+            } catch (IOException e) {
+                System.out.println("Error writing student record: " + e.getMessage());
+            }
+        }
+
+        if (choice.equals("2")){
+            System.out.println("=== Company Representative Registration ===");
+
+            System.out.print("Enter Company Rep ID: ");
+            String companyrepid = scanner.nextLine().trim();
+
+            System.out.print("Enter Name: ");
+            String name = scanner.nextLine().trim();
+
+            System.out.print("Enter Company Name: ");
+            String companyname = scanner.nextLine().trim();
+
+            System.out.print("Enter Department: ");
+            String department = scanner.nextLine().trim();
+
+            System.out.print("Enter Position: ");
+            String position = scanner.nextLine();
+
+            System.out.print("Enter Email: ");
+            String email = scanner.nextLine().trim();
+
+            String approved = "false";
+
+            File file = new File("data/sample_company_representative_list``.csv");
+            boolean writeHeader = !file.exists() || file.length() == 0;
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+
+                if (writeHeader) {
+                    writer.write("CompanyRepID,Name,CompanyName,Department,Position,Email,Approved");
+                    writer.newLine();
+                }
+
+                String record = String.join(",", companyrepid,name,companyname,department,position,email,approved);
+                writer.write(record);
+                writer.newLine();
+                writer.flush();
+
+                System.out.println("Registration completed! Welcome, " + name);
+
+            } catch (IOException e) {
+                System.out.println("Error writing student record: " + e.getMessage());
+            }
+        }
+
+        if (choice.equals("3")){
+            System.out.println("=== Career Staff Registration ===");
+
+            System.out.print("Enter Staff ID: ");
+            String staffid = scanner.nextLine().trim();
+
+            System.out.print("Enter Name: ");
+            String name = scanner.nextLine().trim();
+
+            System.out.print("Enter Role: ");
+            String role = scanner.nextLine().trim();
+
+            System.out.print("Enter Department: ");
+            String department = scanner.nextLine().trim();
+
+            System.out.print("Enter Email: ");
+            String email = scanner.nextLine().trim();
+
+            File file = new File("data/sample_staff_list``.csv");
+            boolean writeHeader = !file.exists() || file.length() == 0;
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+
+                if (writeHeader) {
+                    writer.write("StaffID,Name,Role,Department,Email");
+                    writer.newLine();
+                }
+
+                String record = String.join(",", staffid, name, role, department, email);
+
+                writer.write(record);
+                writer.newLine();
+                writer.flush();
+
+                System.out.println("Registration completed! Welcome, " + name);
+
+            } catch (IOException e) {
+                System.out.println("Error writing student record: " + e.getMessage());
+            }
+        }
     }
 
     private User findUserById(String id, Class<? extends User> type) {

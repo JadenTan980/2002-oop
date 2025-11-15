@@ -2,10 +2,6 @@ package boundary;
 import control.InternshipManager;
 import control.UserDataLoader;
 import entity.*;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -111,144 +107,6 @@ public class InternshipSystemCLI {
         }
     }
 
-    private void register() {
-        System.out.println("I am a:\n1. Student\n2. Company Representative\n3. Career Center Staff\n4. Return");
-        String choice = scanner.nextLine();
-        if (choice.equals("1")){ 
-            System.out.println("=== Student Registration ===");
-        
-            System.out.print("Enter Student ID: ");
-            String studentID = scanner.nextLine().trim();
-        
-            System.out.print("Enter Name: ");
-            String name = scanner.nextLine().trim();
-        
-            System.out.print("Enter Major: ");
-            String major = scanner.nextLine().trim();
-        
-            System.out.print("Enter Year of Study: ");
-            String year = scanner.nextLine();
-        
-            System.out.print("Enter Email: ");
-            String email = scanner.nextLine().trim();
-        
-            File file = new File("data/sample_student_list.csv");
-            boolean writeHeader = !file.exists() || file.length() == 0;
-        
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-        
-                // Write column header ONLY if file is new or empty
-                if (writeHeader) {
-                    writer.write("StudentID,Name,Major,Year,Email");
-                    writer.newLine();
-                }
-        
-                // Build CSV row manually
-                String record = String.join(",", studentID, name, major, year, email);
-        
-                writer.write(record);
-                writer.newLine();
-                writer.flush();
-        
-                System.out.println("Registration completed! Welcome, " + name);
-        
-            } catch (IOException e) {
-                System.out.println("Error writing student record: " + e.getMessage());
-            }
-        }
-
-        if (choice.equals("2")){
-            System.out.println("=== Company Representative Registration ===");
-        
-            System.out.print("Enter Company Rep ID: ");
-            String companyrepid = scanner.nextLine().trim();
-        
-            System.out.print("Enter Name: ");
-            String name = scanner.nextLine().trim();
-
-            System.out.print("Enter Company Name: ");
-            String companyname = scanner.nextLine().trim();
-        
-            System.out.print("Enter Department: ");
-            String department = scanner.nextLine().trim();
-        
-            System.out.print("Enter Position: ");
-            String position = scanner.nextLine();
-        
-            System.out.print("Enter Email: ");
-            String email = scanner.nextLine().trim();
-
-            String approved = "false";
-        
-            File file = new File("data/sample_company_representative_list``.csv");
-            boolean writeHeader = !file.exists() || file.length() == 0;
-        
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-        
-                // Write column header ONLY if file is new or empty
-                if (writeHeader) {
-                    writer.write("CompanyRepID,Name,CompanyName,Department,Position,Email,Approved");
-                    writer.newLine();
-                }
-        
-                // Build CSV row manually
-                String record = String.join(",", companyrepid,name,companyname,department,position,email,approved);
-                writer.write(record);
-                writer.newLine();
-                writer.flush();
-        
-                System.out.println("Registration completed! Welcome, " + name);
-        
-            } catch (IOException e) {
-                System.out.println("Error writing student record: " + e.getMessage());
-            }
-        }
-
-        if (choice.equals("3")){
-            System.out.println("=== Career Staff Registration ===");
-        
-            System.out.print("Enter Staff ID: ");
-            String staffid = scanner.nextLine().trim();
-        
-            System.out.print("Enter Name: ");
-            String name = scanner.nextLine().trim();
-
-            System.out.print("Enter Role: ");
-            String role = scanner.nextLine().trim();
-        
-            System.out.print("Enter Department: ");
-            String department = scanner.nextLine().trim();
-
-            System.out.print("Enter Email: ");
-            String email = scanner.nextLine().trim();
-        
-            File file = new File("data/sample_staff_list``.csv");
-            boolean writeHeader = !file.exists() || file.length() == 0;
-        
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-        
-                // Write column header ONLY if file is new or empty
-                if (writeHeader) {
-                    writer.write("StaffID,Name,Role,Department,Email");
-                    writer.newLine();
-                }
-        
-                // Build CSV row manually
-                String record = String.join(",", staffid, name, role, department, email);
-        
-                writer.write(record);
-                writer.newLine();
-                writer.flush();
-        
-                System.out.println("Registration completed! Welcome, " + name);
-        
-            } catch (IOException e) {
-                System.out.println("Error writing student record: " + e.getMessage());
-            }
-        }
-
-    }
-    
     private void showInternshipOpportunities(Student student) {
         List<Internship> opportunities = internshipManager.getVisibleInternships(student);
         if (opportunities.isEmpty()) {
@@ -317,7 +175,7 @@ public class InternshipSystemCLI {
                 case "1" -> cli.authenticator.handleStudentLogin();
                 case "2" -> cli.authenticator.handleCompanyRepLogin();
                 case "3" -> cli.authenticator.handleCareerStaffLogin();
-                case "4" -> cli.register();
+                case "4" -> cli.authenticator.register();
                 case "0" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
             }
