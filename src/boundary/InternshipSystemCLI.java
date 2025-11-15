@@ -86,6 +86,7 @@ public class InternshipSystemCLI {
             String choice = scanner.nextLine();
             switch (choice){
                 case "1" -> rep.displayDetails();
+                case "2" -> rep.createInternship();
                 case "5" -> rep.changePassword();
                 case "6" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
@@ -366,7 +367,7 @@ public class InternshipSystemCLI {
     private boolean isApprovedStatus(String status) {
         return "true".equalsIgnoreCase(status) || "approved".equalsIgnoreCase(status);
     }
-    
+
     private void showInternshipOpportunities(Student student) {
         List<Internship> opportunities = internshipManager.getVisibleInternships(student);
         if (opportunities.isEmpty()) {
@@ -419,7 +420,6 @@ public class InternshipSystemCLI {
 
     public static void main(String[] args){
         InternshipSystemCLI cli = new InternshipSystemCLI();
-        InternshipManager manager = new InternshipManager();
         cli.loadInitialData();
         System.out.println("Welcome to the Internship Management System.");
         boolean running = true;
@@ -440,8 +440,6 @@ public class InternshipSystemCLI {
                 case "0" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
             }
-
-        // if successfully log in then can access manager
         }
         System.out.println("Goodbye.");
     }

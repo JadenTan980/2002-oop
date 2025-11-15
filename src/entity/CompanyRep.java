@@ -1,5 +1,9 @@
 package entity;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Scanner;
 
 public class CompanyRep extends User {
     private Company company; // owning company
@@ -40,46 +44,33 @@ public class CompanyRep extends User {
 
     // create an internship posting by this rep
     // status: pending, visibility: false (students are unable to see this until it is approved)
-    public Internship createInternship(String title, String description, String level, String preferredMajor,
-                                       java.util.Date openDate, java.util.Date closeDate, int numSlots) 
-                                       
-                                       {
-                                        Internship i = new Internship();
+    public Internship createInternship() {
+        if (company == null) {
+            System.out.println("You must be linked to a company before creating an internship.");
+            return null;
+        }
 
-                                        i.setTitle(title);
-                                        i.setDescription(description);
-                                        i.setLevel(level);
-                                        i.setPreferredMajor(preferredMajor);
-                                        i.setOpenDate(openDate);
-                                        i.setCloseDate(closeDate);
-                                    
-                                        // hidden from students first
-                                        i.setVisibility(false); 
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("=== Create Internship ===");
+        String title = prompt(scanner, "Title");
+        String description = prompt(scanner, "Description");
+        String level = prompt(scanner, "Level (Basic/Intermediate/Advanced)");
+        String preferredMajor = prompt(scanner, "Preferred Major");
+        Date openDate = readDate(scanner, "Opening date (yyyy-MM-dd)");
+        Date closeDate = readDate(scanner, "Closing date (yyyy-MM-dd)");
+        if (openDate == null || closeDate == null) {
+            System.out.println("Invalid dates entered. Internship creation aborted.");
+            return null;
+        }
+        Integer slots = readInteger(scanner, "Number of slots");
+        if (slots == null || slots <= 0) {
+            System.out.println("Number of slots must be a positive integer.");
+            return null;
+        }
 
-                                        // not yet approved by career staff
-                                        i.setApproved(false);               
-                                        i.updateStatus(InternshipStatus.PENDING);
-
-                                        // link the internship to the rep's company
-                                        i.setCompany(company);              
-                                    
-                                        // create the number of empty slots
-                                        ArrayList<InternshipSlot> slots = new ArrayList<>();
-                                        for (int s = 1; s <= numSlots; s++) {
-                                            InternshipSlot slot = new InternshipSlot(s);
-                                            slot.setSlotID(s);
-                                            slot.setApplication(null);
-                                            slots.add(slot);
-                                        }
-
-                                        i.setSlots(slots);
-                                    
-                                        // link this internship to the rep and company
-                                        internships.add(i);
-                                        company.addInternship(i);
-                                    
-                                        return i;
-                                       }
+        System.out.print("Internship created.");
+        return buildInternship(title, description, level, preferredMajor, openDate, closeDate, slots);
+    }
 
 
     // visibility allowed only for approved postings
@@ -188,6 +179,65 @@ public class CompanyRep extends User {
         System.out.println("Company: " + company.getCompanyName());
         System.out.println("Department: " + getDepartment());
         System.out.println("Email: " + getEmail());
+    }
+
+    private Internship buildInternship(String title, String description, String level, String preferredMajor,
+                                       Date openDate, Date closeDate, int numSlots) {
+        Internship internship = new Internship();
+        internship.setTitle(title);
+        internship.setDescription(description);
+        internship.setLevel(level);
+        internship.setPreferredMajor(preferredMajor);
+        internship.setOpenDate(openDate);
+        internship.setCloseDate(closeDate);
+        internship.setVisibility(false);
+        internship.setApproved(false);
+        internship.updateStatus(InternshipStatus.PENDING);
+        internship.setCompany(company);
+
+        ArrayList<InternshipSlot> slots = new ArrayList<>();
+        for (int s = 1; s <= numSlots; s++) {
+            InternshipSlot slot = new InternshipSlot(s);
+            slot.setSlotID(s);
+            slot.setApplication(null);
+            slots.add(slot);
+        }
+        internship.setSlots(slots);
+
+        internships.add(internship);
+        company.addInternship(internship);
+        return internship;
+    }
+
+    private String prompt(Scanner scanner, String label) {
+        System.out.print(label + ": ");
+        return scanner.nextLine().trim();
+    }
+
+    private Date readDate(Scanner scanner, String label) {
+        System.out.print(label + ": ");
+        String input = scanner.nextLine().trim();
+        if (input.isEmpty()) return null;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        format.setLenient(false);
+        try {
+            return format.parse(input);
+        } catch (ParseException e) {
+            System.out.println("Invalid date format. Please use yyyy-MM-dd.");
+            return null;
+        }
+    }
+
+    private Integer readInteger(Scanner scanner, String label) {
+        System.out.print(label + ": ");
+        String input = scanner.nextLine().trim();
+        if (input.isEmpty()) return null;
+        try {
+            return Integer.valueOf(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number.");
+            return null;
+        }
     }
 }
 
