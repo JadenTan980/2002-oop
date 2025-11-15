@@ -2,30 +2,22 @@ package boundary;
 import control.InternshipManager;
 import control.UserDataLoader;
 import entity.*;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 public class InternshipSystemCLI {
     //private attributes
-    private static final Pattern STUDENT_ID_PATTERN = Pattern.compile("^U\\d{7}[A-Za-z]$");// U, 7 digits, 1 letter
-    private static final String COMPANY_REP_CSV = "data/sample_company_representative_list.csv";
-    private static final String COMPANY_REP_HEADER = "CompanyRepID,Name,CompanyName,Department,Position,Email,Approved";
     private ArrayList<User> users = new ArrayList<>();
     private User currentUser;
     private final Scanner scanner = new Scanner(System.in);
     private final UserDataLoader loader = new UserDataLoader();
     private final InternshipManager internshipManager;
+    private final UserAuthenticator authenticator;
 
     public InternshipSystemCLI() {
         this(new InternshipManager());
@@ -33,6 +25,7 @@ public class InternshipSystemCLI {
 
     public InternshipSystemCLI(InternshipManager internshipManager) {
         this.internshipManager = internshipManager != null ? internshipManager : new InternshipManager();
+        this.authenticator = new UserAuthenticator(scanner, this);
     }
 
     //getters and setters
@@ -113,31 +106,6 @@ public class InternshipSystemCLI {
             }
         }
     }
-
-    private void handleStudentLogin() {
-        System.out.print("Enter Student ID: ");
-        String id = scanner.nextLine().trim();
-        if (!STUDENT_ID_PATTERN.matcher(id).matches()) {
-            System.out.println("Invalid student ID.");
-            return;
-        }
-        System.out.println("Password: ");
-        User user = findUserById(id, Student.class);
-        if (user == null) {
-            System.out.println("Student not found.");
-            return;
-        }
-        String password = scanner.nextLine().trim();
-        if (!user.verifyPassword(password)){
-            System.out.println("Incorrect Password");
-            return;
-        }    
-        currentUser = user;
-        System.out.println("Welcome, " + user.getName());
-        displayStudentMenu((Student)user);
-        currentUser = null;
-    }
-
 
     private void register() {
         System.out.println("I am a:\n1. Student\n2. Company Representative\n3. Career Center Staff\n4. Return");
@@ -277,95 +245,6 @@ public class InternshipSystemCLI {
 
     }
     
-
-    private void handleCompanyRepLogin() {
-        System.out.print("Enter Company Rep email: ");
-        String email = scanner.nextLine().trim();
-        System.out.println(("Enter Password: "));
-        User user = findUserById(email, CompanyRep.class);
-        if (user == null) {
-            System.out.println("Company Rep not found.");
-            return;
-        }
-        String password = scanner.nextLine().trim();
-        if (!user.verifyPassword(password)){
-            System.out.println("Incorrect Password");
-            return;
-        }
-        // verify password is correct
-        if (!email.endsWith(".com")) {
-            System.out.println("Invalid company email format.");
-            return;
-        }
-        String[] record = getCompanyRepRecord(email);
-        if (!isApprovedStatus(record[6])) {
-            System.out.println("Your account is pending approval. Please wait for Career Center Staff to approve your registration.");
-            return;
-        }
-        System.out.println("Welcome, " + user.getName());
-        displayRepMenu((CompanyRep)user);
-
-
-    }
-
-    private void handleCareerStaffLogin() {
-        System.out.print("Enter Career Staff ID: ");
-        String email = scanner.nextLine().trim();
-        System.out.print("Password: ");
-        String password  = scanner.nextLine().trim();
-        User user = findUserById(email, CareerCenterStaff.class);
-        if (user == null) {
-            System.out.println("Staff not found.");
-            return;
-        }
-        if (!user.verifyPassword(password)){
-            System.out.println("Incorrect Password");
-            return;
-        }
-        if (!email.endsWith("@ntu.edu.sg")) {
-            System.out.println("Invalid email format for career staff.");
-            return;
-        }
-        currentUser = user;
-        displayStaffMenu((CareerCenterStaff)user);
-        System.out.println("Welcome, " + user.getName());
-        currentUser = null;
-    }
-
-    private User findUserById(String id, Class<? extends User> type) { // checks if user is of correct type
-        for (User user : users) {
-            if (type.isInstance(user) && user.getId().equalsIgnoreCase(id)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    private String[] getCompanyRepRecord(String email) { // read from CSV
-        Path path = Paths.get(COMPANY_REP_CSV);
-        if (!Files.exists(path)) {
-            return null;
-        }
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            String line = reader.readLine(); // skip header
-            while ((line = reader.readLine()) != null) {
-                if (line.isBlank()) continue;
-                String[] columns = line.split(",", -1);
-                if (columns.length < 7) continue;
-                if (columns[5].equalsIgnoreCase(email)) {
-                    return columns;
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Failed to read company representative list: " + e.getMessage());
-        }
-        return null;
-    }
-
-    private boolean isApprovedStatus(String status) {
-        return "true".equalsIgnoreCase(status) || "approved".equalsIgnoreCase(status);
-    }
-
     private void showInternshipOpportunities(Student student) {
         List<Internship> opportunities = internshipManager.getVisibleInternships(student);
         if (opportunities.isEmpty()) {
@@ -431,9 +310,9 @@ public class InternshipSystemCLI {
             System.out.print("Choice: ");
             String choice = cli.scanner.nextLine().trim();
             switch (choice) {
-                case "1" -> cli.handleStudentLogin();
-                case "2" -> cli.handleCompanyRepLogin();
-                case "3" -> cli.handleCareerStaffLogin();
+                case "1" -> cli.authenticator.handleStudentLogin();
+                case "2" -> cli.authenticator.handleCompanyRepLogin();
+                case "3" -> cli.authenticator.handleCareerStaffLogin();
                 case "4" -> cli.register();
                 case "0" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
