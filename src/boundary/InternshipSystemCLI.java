@@ -58,14 +58,17 @@ public class InternshipSystemCLI {
     private void handleStudentLogin() {
         System.out.print("Enter Student ID: ");
         String id = scanner.nextLine().trim();
-        System.out.println("Password: ");
-        String password = scanner.nextLine().trim();
-        // verify password
         if (!STUDENT_ID_PATTERN.matcher(id).matches()) {
             System.out.println("Invalid student ID.");
             return;
         }
+        System.out.println("Password: ");
         User user = findUserById(id, Student.class);
+        String password = scanner.nextLine().trim();
+        if (!user.verifyPassword(password)){
+            System.out.println("Incorrect Password");
+        }
+        
         if (user == null) {
             System.out.println("Student not found.");
             return;
@@ -222,7 +225,11 @@ public class InternshipSystemCLI {
         System.out.print("Enter Company Rep email: ");
         String email = scanner.nextLine().trim();
         System.out.println(("Enter Password: "));
+        User user = findUserById(email, CompanyRep.class);
         String password = scanner.nextLine().trim();
+        if (!user.verifyPassword(password)){
+            System.out.println("Incorrect Password");
+        }
         // verify password is correct
         if (!email.endsWith(".com")) {
             System.out.println("Invalid company email format.");
@@ -243,7 +250,6 @@ public class InternshipSystemCLI {
             return;
         }
 
-        User user = findUserById(email, Student.class);
         if (user == null) {
             System.out.println("Company Rep not found.");
             return;
@@ -259,12 +265,15 @@ public class InternshipSystemCLI {
         System.out.print("Enter Career Staff ID: ");
         String email = scanner.nextLine().trim();
         System.out.print("Password: ");
+        User user = findUserById(email, CareerCenterStaff.class);
         String password  = scanner.nextLine().trim();
+        if (!user.verifyPassword(password)){
+            System.out.println("Incorrect Password");
+        }
         if (!email.endsWith("@ntu.edu.sg")) {
             System.out.println("Invalid email format for career staff.");
             return;
         }
-        User user = findUserById(email, password, CareerCenterStaff.class);
         if (user == null) {
             System.out.println("Career staff not found.");
             return;
@@ -275,9 +284,9 @@ public class InternshipSystemCLI {
         currentUser = null;
     }
 
-    private User findUserById(String id, String password, Class<? extends User> type) { // checks if user is of correct type
+    private User findUserById(String id, Class<? extends User> type) { // checks if user is of correct type
         for (User user : users) {
-            if (type.isInstance(user) && user.getId().equalsIgnoreCase(id) && user.getId().equals(password)) {
+            if (type.isInstance(user) && user.getId().equalsIgnoreCase(id)) {
                 return user;
             }
         }

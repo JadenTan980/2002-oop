@@ -21,7 +21,14 @@ public abstract class User {
     }
     public void setPassword(String password){this.password = password;}
     public boolean login() { return true; }
-    public boolean verifyPassword(String password) { return true; }
+    public boolean verifyPassword(String userpassword) {
+        if (userpassword.equals(password)){
+            return true;
+        }
+        else {
+            return false;
+        }
+        }
     public void changePassword(String oldPw,String newPw) {
         System.out.println("Enter old password: ");
         Scanner scanner = new Scanner(System.in);
