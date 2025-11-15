@@ -237,15 +237,6 @@ public class InternshipSystemCLI {
             return;
         }
         String[] record = getCompanyRepRecord(email);
-        if (record == null) {
-            record = registerCompanyRep(email);
-            if (record == null) {
-                System.out.println("Unable to register company representative at this time.");
-                return;
-            }
-            System.out.println("Registration submitted. Await approval from Career Center Staff.");
-            return;
-        }
         if (!isApprovedStatus(record[6])) {
             System.out.println("Your account is pending approval. Please wait for Career Center Staff to approve your registration.");
             return;
@@ -314,48 +305,6 @@ public class InternshipSystemCLI {
             System.out.println("Failed to read company representative list: " + e.getMessage());
         }
         return null;
-    }
-
-    private String[] registerCompanyRep(String email) { // first time registration
-        System.out.println("No existing company representative record found.");
-        System.out.println("Please provide details for approval.");
-        System.out.print("Name: ");
-        String name = scanner.nextLine().trim();
-        System.out.print("Company Name: ");
-        String company = scanner.nextLine().trim();
-        System.out.print("Department: ");
-        String department = scanner.nextLine().trim();
-        System.out.print("Position: ");
-        String position = scanner.nextLine().trim();
-
-        if (name.isEmpty() || company.isEmpty()) {
-            System.out.println("Name and company are required.");
-            return null;
-        }
-
-        String[] record = new String[]{
-                "REP-" + System.currentTimeMillis(),name,company,department,position,email,"false"
-        };
-
-        if (appendCompanyRepRecord(record)) {
-            return record;
-        }
-        return null;
-    }
-
-    private boolean appendCompanyRepRecord(String[] record) { // append to CSV
-        Path path = Paths.get(COMPANY_REP_CSV);
-        try {
-            Files.createDirectories(path.getParent());
-            if (!Files.exists(path) || Files.size(path) == 0) {
-                Files.writeString(path, COMPANY_REP_HEADER + System.lineSeparator());
-            }
-            Files.writeString(path, String.join(",", record) + System.lineSeparator(), StandardOpenOption.APPEND);
-            return true;
-        } catch (IOException e) {
-            System.out.println("Failed to save company representative registration: " + e.getMessage());
-            return false;
-        }
     }
 
     // private CompanyRep ensureCompanyRepUser(String[] record) { // load or create CompanyRep user
