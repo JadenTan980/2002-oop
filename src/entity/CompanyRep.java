@@ -3,7 +3,6 @@ import java.util.ArrayList;
 
 public class CompanyRep extends User {
     private Company company; // owning company
-    private String name;
     private String department;
     private String position;
     private String email;
@@ -24,6 +23,15 @@ public class CompanyRep extends User {
 
     public ArrayList<Internship> getInternships() { return internships; }
     public void setInternships(ArrayList<Internship> internships) { this.internships = internships; }
+
+    public String getDepartment(){ return department; }
+    public void setDepartment(String department) { this.department = department; }
+
+    public String getPosition(){ return position; }
+    public void setPosition(String position) { this.position = position; }
+
+    public String getEmail(){ return email; }
+    public void setEmail(String email) { this.email = email; }
 
     // functions
 
@@ -174,7 +182,12 @@ public class CompanyRep extends User {
         return apps;
     
     }
-
+    public void displayDetails(){
+        System.out.println("ID: " + getId());
+        System.out.println("Name: " + getName());
+        System.out.println("Company: " + company.getCompanyName());
+        System.out.println("Department: " + getDepartment());
+    }
 }
 
 

@@ -92,5 +92,12 @@ public class Student extends User {
         if (application != null) applications.add(application);
     }
 
-}
+    public void displayDetails() {
+        System.out.println("Student ID: " + getId());
+        System.out.println("Name: " + getName());
+        System.out.println("Major: " + getMajor());
+        System.out.println("Year: " + getYear());
+        System.out.println("Applications submitted: " + applications.size());
+    }
 
+}

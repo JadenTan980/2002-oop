@@ -39,7 +39,9 @@ public class InternshipSystemCLI {
         users.addAll(staff);
         users.addAll(reps);
     }
-    public void displayStudentMenu() { }
+    public void displayStudentMenu() {
+        
+     }
     public void displayRepMenu() { }
     public void displayStaffMenu() { }
 

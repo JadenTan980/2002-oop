@@ -28,7 +28,6 @@ public abstract class User {
         String pw = scanner.nextLine(); 
         if (!pw.equals(oldPw)) {
             System.out.println("Incorrect old password. Password change failed.");
-            return;
         }
         else {
             System.out.println("Password changed successfully.");
