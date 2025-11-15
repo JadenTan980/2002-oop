@@ -135,7 +135,7 @@ public class InternshipSystemCLI {
 
             String approved = "0";
         
-            File file = new File("data/sample_company_representative_list.csv");
+            File file = new File("data/sample_company_representative_list``.csv");
             boolean writeHeader = !file.exists() || file.length() == 0;
         
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
