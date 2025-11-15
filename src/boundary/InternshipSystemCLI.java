@@ -1,4 +1,5 @@
 package boundary;
+import control.FilterSettings;
 import control.InternshipManager;
 import control.UserDataLoader;
 import entity.*;
@@ -53,7 +54,7 @@ public class InternshipSystemCLI {
             String choice = scanner.nextLine();
             switch (choice){
                 case "1" -> student.displayDetails();
-                case "2" -> showInternshipOpportunities(student);
+                case "2" -> internshipManager.run(student, scanner);
                 case "3" -> {
                     syncStudentApplications(student);
                     student.viewApplications();
@@ -77,8 +78,9 @@ public class InternshipSystemCLI {
         System.out.println("(2) Create internship");
         System.out.println("(3) Manage internship applications");
         System.out.println("(4) Change internship visibility");
-        System.out.println("(5) Change password");
-        System.out.println("(6) Exit");
+        System.out.println("(5) View internships (with filters)");
+        System.out.println("(6) Change password");
+        System.out.println("(7) Exit");
         while (running){
             System.out.println("Enter choice: ");
             String choice = scanner.nextLine();
@@ -98,8 +100,9 @@ public class InternshipSystemCLI {
                     syncRepInternships(rep);
                     rep.toggleVisibility();
                 }
-                case "5" -> rep.changePassword();
-                case "6" -> running = false;
+                case "5" -> internshipManager.run(rep, scanner);
+                case "6" -> rep.changePassword();
+                case "7" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
             }
         }
@@ -113,7 +116,7 @@ public class InternshipSystemCLI {
         System.out.println("(2) Manage internship requests");
         System.out.println("(3) Manage student withdrawal requests");
         System.out.println("(4) Manage Company Rep account creation");
-        System.out.println("(5) View internship information");
+        System.out.println("(5) View all internships (with filters)");
         System.out.println("(6) Generate reports");
         System.out.println("(7) Change password");
         System.out.println("(8) Exit");
@@ -123,6 +126,8 @@ public class InternshipSystemCLI {
             switch (choice){
                 case "1" -> staff.displayDetails();
                 case "4" -> handleRepAuthorization(staff);
+                case "5" -> internshipManager.run(staff, scanner);
+                case "6" -> handleGenerateReport(staff);
                 case "7" -> staff.changePassword();
                 case "8" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
@@ -131,52 +136,6 @@ public class InternshipSystemCLI {
         System.out.println("Exiting...");
     }
 
-    private void showInternshipOpportunities(Student student) {
-        List<Internship> opportunities = internshipManager.getVisibleInternships(student);
-        if (opportunities.isEmpty()) {
-            System.out.println("No internships available for your profile at the moment.");
-            return;
-        }
-
-        System.out.println("Available internships:");
-        for (int i = 0; i < opportunities.size(); i++) {
-            Internship internship = opportunities.get(i);
-            String companyName = internship.getCompany() != null
-                    ? safeValue(internship.getCompany().getCompanyName())
-                    : "Unknown Company";
-            System.out.printf("%d. %s at %s [%s]%n",
-                    i + 1,
-                    safeValue(internship.getTitle()),
-                    companyName,
-                    safeValue(internship.getLevel()));
-            System.out.println("   Preferred major: " + safeValue(internship.getPreferredMajor()));
-            if (internship.getOpenDate() != null || internship.getCloseDate() != null) {
-                System.out.println("   Open: " + internship.getOpenDate() + " | Close: " + internship.getCloseDate());
-            }
-        }
-
-        System.out.print("Enter internship number to apply or press Enter to cancel: ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            System.out.println("Returning to menu.");
-            return;
-        }
-        try {
-            int index = Integer.parseInt(input);
-            if (index < 1 || index > opportunities.size()) {
-                System.out.println("Invalid option.");
-                return;
-            }
-            Internship selected = opportunities.get(index - 1);
-            if (student.applyInternship(selected)) {
-                System.out.println("Application submitted for " + safeValue(selected.getTitle()) + ".");
-            } else {
-                System.out.println("Unable to apply. You may have reached your application limit or already accepted an offer.");
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Returning to menu.");
-        }
-    }
     private void syncStudentApplications(Student student) { //prunes entries whose internships do not exist in manager
         if (student == null) return;
         student.getApplications().removeIf(app ->
@@ -225,8 +184,21 @@ public class InternshipSystemCLI {
         boolean approve = scanner.nextLine().trim().equalsIgnoreCase("y");
         staff.authoriseRep(pending.get(selection - 1), approve);
     }
-    private String safeValue(String value) {
-        return (value == null || value.isBlank()) ? "N/A" : value;
+
+    private void handleGenerateReport(CareerCenterStaff staff) {
+        FilterSettings filters = internshipManager.getOrCreateFilterSettings(staff.getId());
+        List<Internship> filtered = internshipManager.getFilteredInternships(staff.getId());
+        if (filtered.isEmpty()) {
+            System.out.println("No internships available for reporting with current filters.");
+            return;
+        }
+        staff.generateReport(
+                filtered,
+                filters.getStatus(),
+                filters.getMajor(),
+                filters.getLevel(),
+                filters.getCompany()
+        );
     }
 
     public static void main(String[] args){
