@@ -47,7 +47,8 @@ public class InternshipSystemCLI {
         System.out.println("(2) View internship opportunities");
         System.out.println("(3) View internship application status");
         System.out.println("(4) Request application withdrawal");
-        System.out.println("(5) Exit");
+        System.out.println("(5) Change Password");
+        System.out.println("(6) Exit");
         while (running){
             System.out.println("Enter choice: ");
             String choice = scanner.nextLine();
@@ -285,8 +286,7 @@ public class InternshipSystemCLI {
             System.out.println("Your account is pending approval. Please wait for Career Center Staff to approve your registration.");
             return;
         }
-
-        displayStaffMenu();
+        displayRepMenu((CompanyRep)user);
         System.out.println("Welcome, " + user.getName());
 
 
@@ -296,12 +296,12 @@ public class InternshipSystemCLI {
         System.out.print("Enter Career Staff ID: ");
         String email = scanner.nextLine().trim();
         System.out.print("Password: ");
+        String password  = scanner.nextLine().trim();
         User user = findUserById(email, CareerCenterStaff.class);
         if (user == null) {
             System.out.println("Staff not found.");
             return;
         }
-        String password  = scanner.nextLine().trim();
         if (!user.verifyPassword(password)){
             System.out.println("Incorrect Password");
             return;
@@ -311,8 +311,8 @@ public class InternshipSystemCLI {
             return;
         }
         currentUser = user;
+        displayStaffMenu((CareerCenterStaff)user);
         System.out.println("Welcome, " + user.getName());
-        displayStaffMenu();
         currentUser = null;
     }
 
