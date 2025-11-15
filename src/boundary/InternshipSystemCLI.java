@@ -72,52 +72,6 @@ public class InternshipSystemCLI {
         
     }
 
-    private void showInternshipOpportunities(Student student) {
-        List<Internship> opportunities = internshipManager.getVisibleInternships(student);
-        if (opportunities.isEmpty()) {
-            System.out.println("No internships available for your profile at the moment.");
-            return;
-        }
-
-        System.out.println("Available internships:");
-        for (int i = 0; i < opportunities.size(); i++) {
-            Internship internship = opportunities.get(i);
-            String companyName = internship.getCompany() != null
-                    ? safeValue(internship.getCompany().getCompanyName())
-                    : "Unknown Company";
-            System.out.printf("%d. %s at %s [%s]%n",
-                    i + 1,
-                    safeValue(internship.getTitle()),
-                    companyName,
-                    safeValue(internship.getLevel()));
-            System.out.println("   Preferred major: " + safeValue(internship.getPreferredMajor()));
-            if (internship.getOpenDate() != null || internship.getCloseDate() != null) {
-                System.out.println("   Open: " + internship.getOpenDate() + " | Close: " + internship.getCloseDate());
-            }
-        }
-
-        System.out.print("Enter internship number to apply or press Enter to cancel: ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            System.out.println("Returning to menu.");
-            return;
-        }
-        try {
-            int index = Integer.parseInt(input);
-            if (index < 1 || index > opportunities.size()) {
-                System.out.println("Invalid option.");
-                return;
-            }
-            Internship selected = opportunities.get(index - 1);
-            if (student.applyInternship(selected)) {
-                System.out.println("Application submitted for " + safeValue(selected.getTitle()) + ".");
-            } else {
-                System.out.println("Unable to apply. You may have reached your application limit or already accepted an offer.");
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Returning to menu.");
-        }
-    }
     public void displayRepMenu(CompanyRep rep) {
         boolean running = true;
         System.out.println("What do you want to do?");
@@ -348,8 +302,9 @@ public class InternshipSystemCLI {
             return;
         }
 
-        displayStaffMenu();
+        
         System.out.println("Welcome, " + user.getName());
+        displayRepMenu((CompanyRep)user);
 
 
     }
@@ -374,7 +329,7 @@ public class InternshipSystemCLI {
         }
         currentUser = user;
         System.out.println("Welcome, " + user.getName());
-        displayStaffMenu();
+        displayStaffMenu((CareerCenterStaff)user);
         currentUser = null;
     }
 
@@ -408,22 +363,56 @@ public class InternshipSystemCLI {
         return null;
     }
 
-    // private CompanyRep ensureCompanyRepUser(String[] record) { // load or create CompanyRep user
-    //     String email = record[5];
-    //     User existing = findUserById(email, CompanyRep.class);
-    //     if (existing != null) {
-    //         return (CompanyRep) existing;
-    //     }
-    //     CompanyRep rep = new CompanyRep(email, record[1], "");
-    //     rep.setAuthorised(isApprovedStatus(record[6]));
-    //     users.add(rep);
-    //     return rep;
-    // }
-
     private boolean isApprovedStatus(String status) {
         return "true".equalsIgnoreCase(status) || "approved".equalsIgnoreCase(status);
     }
+    
+    private void showInternshipOpportunities(Student student) {
+        List<Internship> opportunities = internshipManager.getVisibleInternships(student);
+        if (opportunities.isEmpty()) {
+            System.out.println("No internships available for your profile at the moment.");
+            return;
+        }
 
+        System.out.println("Available internships:");
+        for (int i = 0; i < opportunities.size(); i++) {
+            Internship internship = opportunities.get(i);
+            String companyName = internship.getCompany() != null
+                    ? safeValue(internship.getCompany().getCompanyName())
+                    : "Unknown Company";
+            System.out.printf("%d. %s at %s [%s]%n",
+                    i + 1,
+                    safeValue(internship.getTitle()),
+                    companyName,
+                    safeValue(internship.getLevel()));
+            System.out.println("   Preferred major: " + safeValue(internship.getPreferredMajor()));
+            if (internship.getOpenDate() != null || internship.getCloseDate() != null) {
+                System.out.println("   Open: " + internship.getOpenDate() + " | Close: " + internship.getCloseDate());
+            }
+        }
+
+        System.out.print("Enter internship number to apply or press Enter to cancel: ");
+        String input = scanner.nextLine().trim();
+        if (input.isEmpty()) {
+            System.out.println("Returning to menu.");
+            return;
+        }
+        try {
+            int index = Integer.parseInt(input);
+            if (index < 1 || index > opportunities.size()) {
+                System.out.println("Invalid option.");
+                return;
+            }
+            Internship selected = opportunities.get(index - 1);
+            if (student.applyInternship(selected)) {
+                System.out.println("Application submitted for " + safeValue(selected.getTitle()) + ".");
+            } else {
+                System.out.println("Unable to apply. You may have reached your application limit or already accepted an offer.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Returning to menu.");
+        }
+    }
     private String safeValue(String value) {
         return (value == null || value.isBlank()) ? "N/A" : value;
     }
