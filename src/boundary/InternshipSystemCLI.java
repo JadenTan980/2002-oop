@@ -64,6 +64,7 @@ public class InternshipSystemCLI {
         currentUser = null;
     }
 
+
     private void register() {
         System.out.println("I am a:\n1. Student\n2. Company Representative\n3. Career Center Staff\n4. Return");
         String choice = scanner.nextLine();
@@ -102,10 +103,6 @@ public class InternshipSystemCLI {
                 writer.write(record);
                 writer.newLine();
                 writer.flush();
-        
-                // Add to in-memory users list
-                Student student = new Student(studentID, name, major, Integer.parseInt(year), email);
-                users.add(student);
         
                 System.out.println("Registration completed! Welcome, " + name);
         
@@ -161,6 +158,50 @@ public class InternshipSystemCLI {
                 System.out.println("Error writing student record: " + e.getMessage());
             }
         }
+
+        if (choice.equals("3")){
+            System.out.println("=== Career Staff Registration ===");
+        
+            System.out.print("Enter Staff ID: ");
+            String staffid = scanner.nextLine().trim();
+        
+            System.out.print("Enter Name: ");
+            String name = scanner.nextLine().trim();
+
+            System.out.print("Enter Role: ");
+            String role = scanner.nextLine().trim();
+        
+            System.out.print("Enter Department: ");
+            String department = scanner.nextLine().trim();
+
+            System.out.print("Enter Email: ");
+            String email = scanner.nextLine().trim();
+        
+            File file = new File("data/sample_staff_list``.csv");
+            boolean writeHeader = !file.exists() || file.length() == 0;
+        
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+        
+                // Write column header ONLY if file is new or empty
+                if (writeHeader) {
+                    writer.write("StaffID,Name,Role,Department,Email");
+                    writer.newLine();
+                }
+        
+                // Build CSV row manually
+                String record = String.join(",", staffid, name, role, department, email);
+        
+                writer.write(record);
+                writer.newLine();
+                writer.flush();
+        
+                System.out.println("Registration completed! Welcome, " + name);
+        
+            } catch (IOException e) {
+                System.out.println("Error writing student record: " + e.getMessage());
+            }
+        }
+
     }
     
 
