@@ -22,13 +22,8 @@ public abstract class User {
     public void setPassword(String password){this.password = password;}
     public boolean login() { return true; }
     public boolean verifyPassword(String userpassword) {
-        if (userpassword.equals(password)){
-            return true;
-        }
-        else {
-            return false;
-        }
-        }
+        return userpassword.equals(password);
+    }
 
     public void changePassword() {
         System.out.println("Enter old password: ");
