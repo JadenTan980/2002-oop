@@ -19,7 +19,7 @@ public class Student extends User {
         this.year = year;
         this.major = major;
     }
-
+    
 
 
     public String getYear() { return year; }
@@ -97,6 +97,7 @@ public class Student extends User {
         System.out.println("Major: " + getMajor());
         System.out.println("Year: " + getYear());
         System.out.println("Applications submitted: " + applications.size());
+        System.out.println("Password: " + getPassword());
     }
 
 }

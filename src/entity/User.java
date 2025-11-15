@@ -14,6 +14,7 @@ public abstract class User {
     }
     public String getId() { return id; }
     public String getName() { return name; }
+    public String getPassword(){return password;}
     public void setName(String name) {
         // if (name == null || name.isBlank()) throw new IllegalArgumentException("name required");
         // to be added later, returning any exceptions good for edge cases
