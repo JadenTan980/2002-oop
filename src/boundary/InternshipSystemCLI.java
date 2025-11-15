@@ -39,8 +39,18 @@ public class InternshipSystemCLI {
         users.addAll(staff);
         users.addAll(reps);
     }
-    public void displayStudentMenu() {
-        
+    public void displayStudentMenu(Student student) {
+        System.out.println("What do you want to do?");
+        System.out.println("(1) Display details");
+        System.out.println("(2) View internship opportunities");
+        System.out.println("(3) View internship application status");
+        System.out.println("(4) Request application withdrawal");
+        System.out.println("(5) Exit");
+        System.out.println("Enter choice: ");
+        String choice = scanner.nextLine();
+        switch (choice){
+            case "1" -> student.displayDetails();
+        }
      }
     public void displayRepMenu() { }
     public void displayStaffMenu() { }
@@ -63,7 +73,7 @@ public class InternshipSystemCLI {
         
         currentUser = user;
         System.out.println("Welcome, " + user.getName());
-        displayStudentMenu();
+        displayStudentMenu((Student)user);
         currentUser = null;
     }
 
