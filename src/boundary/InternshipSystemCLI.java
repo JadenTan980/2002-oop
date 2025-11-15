@@ -48,6 +48,9 @@ public class InternshipSystemCLI {
     private void handleStudentLogin() {
         System.out.print("Enter Student ID: ");
         String id = scanner.nextLine().trim();
+        System.out.println("Password: ");
+        String password = scanner.nextLine().trim();
+        // verify password
         if (!STUDENT_ID_PATTERN.matcher(id).matches()) {
             System.out.println("Invalid student ID.");
             return;
@@ -208,6 +211,9 @@ public class InternshipSystemCLI {
     private void handleCompanyRepLogin() {
         System.out.print("Enter Company Rep email: ");
         String email = scanner.nextLine().trim();
+        System.out.println(("Enter Password: "));
+        String password = scanner.nextLine().trim();
+        // verify password is correct
         if (!email.endsWith(".com")) {
             System.out.println("Invalid company email format.");
             return;
@@ -226,6 +232,15 @@ public class InternshipSystemCLI {
             System.out.println("Your account is pending approval. Please wait for Career Center Staff to approve your registration.");
             return;
         }
+
+        User user = findUserById(email, Student.class);
+        if (user == null) {
+            System.out.println("Company Rep not found.");
+            return;
+        }
+
+        displayStaffMenu();
+        System.out.println("Welcome, " + user.getName());
 
 
     }
