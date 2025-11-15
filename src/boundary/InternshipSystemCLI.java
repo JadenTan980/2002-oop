@@ -79,6 +79,8 @@ public class InternshipSystemCLI {
             switch (choice){
                 case "1" -> rep.displayDetails();
                 case "2" -> rep.createInternship();
+                case "3" -> rep.manageApplications();
+                case "4" -> rep.toggleVisibility();
                 case "5" -> rep.changePassword();
                 case "6" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
@@ -91,8 +93,8 @@ public class InternshipSystemCLI {
         boolean running = true;
         System.out.println("What do you want to do?");
         System.out.println("(1) Display details");
-        System.out.println("(2) Manage internship opportunities");
-        System.out.println("(3) Change student withdrawal requests");
+        System.out.println("(2) Manage internship requests");
+        System.out.println("(3) Manage student withdrawal requests");
         System.out.println("(4) View internship information");
         System.out.println("(5) Change password");
         System.out.println("(6) Exit");
@@ -102,9 +104,11 @@ public class InternshipSystemCLI {
             switch (choice){
                 case "1" -> staff.displayDetails();
                 case "5" -> staff.changePassword();
+                case "6" -> running = false;
                 default -> System.out.println("Invalid choice. Try again.");
             }
         }
+        System.out.println("Exiting...");
     }
 
     private void showInternshipOpportunities(Student student) {

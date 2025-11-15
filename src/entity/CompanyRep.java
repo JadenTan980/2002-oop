@@ -72,20 +72,126 @@ public class CompanyRep extends User {
         return buildInternship(title, description, level, preferredMajor, openDate, closeDate, slots);
     }
 
+    private String prompt(Scanner scanner, String label) {
+        System.out.print(label + ": ");
+        return scanner.nextLine().trim();
+    }
+
+    private Date readDate(Scanner scanner, String label) {
+        System.out.print(label + ": ");
+        String input = scanner.nextLine().trim();
+        if (input.isEmpty()) return null;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        format.setLenient(false);
+        try {
+            return format.parse(input);
+        } catch (ParseException e) {
+            System.out.println("Invalid date format. Please use yyyy-MM-dd.");
+            return null;
+        }
+    }
+
+    private Integer readInteger(Scanner scanner, String label) {
+        System.out.print(label + ": ");
+        String input = scanner.nextLine().trim();
+        if (input.isEmpty()) return null;
+        try {
+            return Integer.valueOf(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number.");
+            return null;
+        }
+    }
 
     // visibility allowed only for approved postings
-    public void toggleVisibility(Internship internship) 
-    {         
-        // if the internship itself is null nothing to toggle
-        if (internship == null) 
-            { return; }
-
-        if (internship.getStatus() != InternshipStatus.APPROVED) {
-            throw new IllegalStateException("Can only toggle visibility for 'Approved' internships.");
+    public void toggleVisibility() {
+        if (internships.isEmpty()) {
+            System.out.println("No internships available.");
+            return;
         }
-
+        System.out.println("Select an internship to toggle visibility:");
+        for (int i = 0; i < internships.size(); i++) {
+            Internship in = internships.get(i);
+            System.out.printf("%d. %s (Visible: %s, Status: %s)%n",
+                    i + 1, in.getTitle(), in.isVisibility(), in.getStatus());
+        }
+        System.out.print("Choice: ");
+        Scanner scanner = new Scanner(System.in);
+        int choice;
+        try {
+            choice = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        if (choice < 1 || choice > internships.size()) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        Internship internship = internships.get(choice - 1);
+        if (internship.getStatus() != InternshipStatus.APPROVED) {
+            System.out.println("Only approved internships can change visibility.");
+            return;
+        }
         internship.setVisibility(!internship.isVisibility());
+        System.out.println("Visibility updated: " + internship.isVisibility());
+    }
 
+    public void manageApplications() {
+        if (internships.isEmpty()) {
+            System.out.println("No internships available.");
+            return;
+        }
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Select an internship to manage:");
+        for (int i = 0; i < internships.size(); i++) {
+            Internship in = internships.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, in.getTitle(), in.getStatus());
+        }
+        System.out.print("Choice: ");
+        int internshipChoice;
+        try {
+            internshipChoice = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        if (internshipChoice < 1 || internshipChoice > internships.size()) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        java.util.List<Application> applications = viewApplications(internships.get(internshipChoice - 1));
+        if (applications.isEmpty()) {
+            System.out.println("No applications to manage for this internship.");
+            return;
+        }
+        System.out.println("Select an application:");
+        for (int i = 0; i < applications.size(); i++) {
+            Application app = applications.get(i);
+            System.out.printf("%d. %s (%s)%n", i + 1, app.getStudent().getName(), app.getStatus());
+        }
+        System.out.print("Choice: ");
+        int appChoice;
+        try {
+            appChoice = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        if (appChoice < 1 || appChoice > applications.size()) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        Application selected = applications.get(appChoice - 1);
+        System.out.print("Approve (A) or Reject (R): ");
+        String decision = scanner.nextLine().trim().toUpperCase();
+        if ("A".equals(decision)) {
+            System.out.println(approveApplication(selected) ? "Application approved." : "Unable to approve application.");
+        } else if ("R".equals(decision)) {
+            System.out.println(rejectApplication(selected) ? "Application rejected." : "Unable to reject application.");
+        } else {
+            System.out.println("Invalid action.");
+        }
     }
     
     
@@ -114,41 +220,31 @@ public class CompanyRep extends User {
         application.setStatus(ApplicationStatus.SUCCESSFUL);
 
         // fill the 1st free slot up 
-        for (InternshipSlot slot: internship.getSlots())  
-        {
-            if (!slot.isFilled()) 
-            {
+        for (InternshipSlot slot: internship.getSlots()){
+            if (!slot.isFilled()){
                 slot.markFilled();
                 slot.setApplication(application);
                 break;
             }
         }
-
         // if all the internship slots are filled up, we mark the posting as filled 
         if (internship.isFull()) {
             internship.updateStatus(InternshipStatus.FILLED);
         }
-
         return true;
-
     }
 
     
-    public boolean rejectApplication(Application application) { 
-        
+    public boolean rejectApplication(Application application) {         
         if (application == null) 
-            { return false; }
-        
+            { return false; }       
         Internship internship = application.getInternship();
         if (internship == null) 
             { return false; } 
-
         if (!this.internships.contains(internship)) 
-            { return false; }
-        
+            { return false; }        
         application.setStatus(ApplicationStatus.UNSUCCESSFUL);
         return true;
-
     }
 
     // returns a list if the internship belongs to this rep 
@@ -156,23 +252,18 @@ public class CompanyRep extends User {
     public java.util.List<Application> viewApplications(Internship internship) { 
         
         if (internship == null) 
-            { return java.util.Collections.emptyList(); }
-        
+            { return java.util.Collections.emptyList(); }        
         if (!this.internships.contains(internship)) 
             { return java.util.Collections.emptyList(); }
-
         java.util.ArrayList<Application> apps = new java.util.ArrayList<>();
-
         for (InternshipSlot slot: internship.getSlots()) { 
-            Application app = slot.getApplication();  
-            
+            Application app = slot.getApplication();              
             if (app != null) 
                 { apps.add(app); }
         }
-
-        return apps;
-    
+        return apps;    
     }
+
     public void displayDetails(){
         System.out.println("ID: " + getId());
         System.out.println("Name: " + getName());
@@ -209,36 +300,6 @@ public class CompanyRep extends User {
         return internship;
     }
 
-    private String prompt(Scanner scanner, String label) {
-        System.out.print(label + ": ");
-        return scanner.nextLine().trim();
-    }
-
-    private Date readDate(Scanner scanner, String label) {
-        System.out.print(label + ": ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) return null;
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        format.setLenient(false);
-        try {
-            return format.parse(input);
-        } catch (ParseException e) {
-            System.out.println("Invalid date format. Please use yyyy-MM-dd.");
-            return null;
-        }
-    }
-
-    private Integer readInteger(Scanner scanner, String label) {
-        System.out.print(label + ": ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) return null;
-        try {
-            return Integer.valueOf(input);
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid number.");
-            return null;
-        }
-    }
 }
 
 
