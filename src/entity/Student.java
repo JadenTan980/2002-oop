@@ -46,8 +46,23 @@ public class Student extends User {
 
     }
 
-    public List<Application> viewApplications() {
-        return Collections.unmodifiableList(applications);
+    public void viewApplications() {
+        if (applications.isEmpty()) {
+            System.out.println("You have not submitted any applications.");
+        } else {
+            System.out.println("Your applications:");
+            for (int i = 0; i < applications.size(); i++) {
+                Application application = applications.get(i);
+                String title = application.getInternship() != null
+                        ? application.getInternship().getTitle()
+                        : "Unknown Internship";
+                System.out.printf("%d. %s - Status: %s (Applied on %s)%n",
+                        i + 1,
+                        title,
+                        application.getStatus(),
+                        application.getDateApplied());
+            }
+        }
     }
 
 

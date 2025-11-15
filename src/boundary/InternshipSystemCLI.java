@@ -42,12 +42,13 @@ public class InternshipSystemCLI {
         users.addAll(staff);
         users.addAll(reps);
     }
+    
     public void displayStudentMenu(Student student) {
         boolean running = true;
         System.out.println("What do you want to do?");
         System.out.println("(1) Display details");
         System.out.println("(2) View internship opportunities");
-        System.out.println("(3) View internship application status");
+        System.out.println("(3) View your internship applications");
         System.out.println("(4) Request application withdrawal");
         System.out.println("(5) Change password");
         System.out.println("(6) Exit");
@@ -57,6 +58,7 @@ public class InternshipSystemCLI {
             switch (choice){
                 case "1" -> student.displayDetails();
                 case "2" -> showInternshipOpportunities(student);
+                case "3" -> student.viewApplications();
                 case "4" -> student.reqWithdrawal();
                 case "5" -> student.changePassword();
                 case "6" -> running = false;
@@ -64,7 +66,6 @@ public class InternshipSystemCLI {
             }  
         }
         System.out.println("Exiting...");
-        
     }
 
     public void displayRepMenu(CompanyRep rep) {
@@ -89,6 +90,7 @@ public class InternshipSystemCLI {
         }
         System.out.println("Exiting...");
     }
+
     public void displayStaffMenu(CareerCenterStaff staff) { 
         boolean running = true;
         System.out.println("What do you want to do?");
