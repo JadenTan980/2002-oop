@@ -41,24 +41,34 @@ public class InternshipSystemCLI {
         users.addAll(reps);
     }
     public void displayStudentMenu(Student student) {
+        boolean running = true;
         System.out.println("What do you want to do?");
         System.out.println("(1) Display details");
         System.out.println("(2) View internship opportunities");
         System.out.println("(3) View internship application status");
         System.out.println("(4) Request application withdrawal");
-        System.out.println("(5) Change Password");
-        System.out.println("(6) Exit");
+        System.out.println("(5) Exit");
         System.out.println("Enter choice: ");
         String choice = scanner.nextLine();
         switch (choice){
             case "1" -> student.displayDetails();
+            default -> System.out.println("Invalid choice. Try again.");
         }
      }
-    public void displayRepMenu() {
+    public void displayRepMenu(CompanyRep rep) {
         System.out.println("What do you want to do?");
         System.out.println("(1) Display details");
         System.out.println("(2) Create internship");
         System.out.println("(3) Manage internship applications");
+        System.out.println("(4) Change internship visibility");
+        System.out.println("(5) Change password");
+        System.out.println("(6) Exit");
+        String choice = scanner.nextLine();
+        switch (choice){
+            case "1" -> rep.displayDetails();
+            case "5" -> rep.changePassword();
+
+        }
     }
     public void displayStaffMenu() { }
 
