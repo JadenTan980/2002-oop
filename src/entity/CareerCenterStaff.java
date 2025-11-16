@@ -73,6 +73,80 @@ public class CareerCenterStaff extends User {
         }
     }
 
+    public void handleInternshipRequests(java.util.List<Internship> internships, java.util.Scanner scanner) {
+        if (internships == null || internships.isEmpty()) {
+            System.out.println("No internships to review.");
+            return;
+        }
+        java.util.ArrayList<Internship> pending = new java.util.ArrayList<>();
+        for (Internship internship : internships) {
+            if (internship.getStatus() == InternshipStatus.PENDING) {
+                pending.add(internship);
+            }
+        }
+        if (pending.isEmpty()) {
+            System.out.println("No pending internship requests.");
+            return;
+        }
+        for (int i = 0; i < pending.size(); i++) {
+            Internship in = pending.get(i);
+            String companyName = in.getCompany() != null ? in.getCompany().getCompanyName() : "Unknown Company";
+            System.out.printf("%d. %s (%s)%n", i + 1, in.getTitle(), companyName);
+        }
+        System.out.print("Select internship to review: ");
+        int idx;
+        try {
+            idx = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        if (idx < 1 || idx > pending.size()) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        System.out.print("Approve internship? (y/n): ");
+        boolean approve = scanner.nextLine().trim().equalsIgnoreCase("y");
+        approveInternship(pending.get(idx - 1), approve);
+    }
+
+    public void handleWithdrawalRequests(java.util.List<User> users, java.util.Scanner scanner) {
+        java.util.ArrayList<Application> pending = new java.util.ArrayList<>();
+        for (User user : users) 
+            if (user instanceof Student s) 
+                for (Application app : s.getApplications()) 
+                    if (app.getStatus() == ApplicationStatus.PENDING_WITHDRAWAL) 
+                        pending.add(app);
+        if (pending.isEmpty()) {
+            System.out.println("No withdrawal requests.");
+            return;
+        }
+        for (int i = 0; i < pending.size(); i++) {
+            Application app = pending.get(i);
+            System.out.printf("%d. %s - %s%n", i + 1, app.getStudent().getName(), app.getInternship().getTitle());
+        }
+        System.out.print("Select request: ");
+        int idx;
+        try { idx = Integer.parseInt(scanner.nextLine().trim()); } catch (NumberFormatException e) { System.out.println("Invalid selection."); return; }
+        if (idx < 1 || idx > pending.size()) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+        System.out.print("Approve withdrawal? (y/n): ");
+        boolean approve = scanner.nextLine().trim().equalsIgnoreCase("y");
+        Application target = pending.get(idx - 1);
+        if (approve) {
+            approveWithdrawal(target, true);
+            target.setWithdrawn(true);
+            target.updateStatus(ApplicationStatus.WITHDRAWN);
+            System.out.println("Withdrawal approved.");
+        } else {
+            target.setWithdrawn(false);
+            target.updateStatus(ApplicationStatus.PENDING);
+            System.out.println("Withdrawal rejected.");
+        }
+    }
+
     public void displayDetails(){
         System.out.println("ID: " + getid());
         System.out.println("Name: " + getname());

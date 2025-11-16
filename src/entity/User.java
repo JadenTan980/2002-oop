@@ -6,15 +6,19 @@ public abstract class User {
     private String id;
     private String name;
     private String password;
+    private String email;
 
     public User(String id, String name, String password) {
         this.id = id;
         this.name = name;
         this.password = "password";
     }
+    public void setId(String id){this.id = id;}
     public String getId() { return id; }
     public String getName() { return name; }
     public String getPassword(){return password;}
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
     public void setName(String name) {
         // if (name == null || name.isBlank()) throw new IllegalArgumentException("name required");
         // to be added later, returning any exceptions good for edge cases
@@ -34,10 +38,11 @@ public abstract class User {
             System.out.println("Incorrect old password. Password change failed.");
         }
         else {
-            System.out.print("Enter new password");
+            System.out.println("Enter new password: ");
             this.password = scanner.nextLine();
             System.out.println("Password changed successfully.");
         }
     }
+
 }
 
