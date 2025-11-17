@@ -5,12 +5,12 @@ import java.util.List;
 public class Internship {
     private final String title;
     private final String description;
-    private String level;
+    private InternshipLevel level;
     private String preferredMajor;
     private Date openDate;
     private Date closeDate;
     private boolean visibility = true;
-    private String status = "Pending";
+    private InternshipStatus status = InternshipStatus.PENDING;
     private final String companyName;
     private final CompanyRep repInCharge;
     private final List<InternshipSlot> slots = new ArrayList<>();
@@ -31,11 +31,11 @@ public class Internship {
         return description;
     }
 
-    public String getLevel() {
+    public InternshipLevel getLevel() {
         return level;
     }
 
-    public void setLevel(String level) {
+    public void setLevel(InternshipLevel level) {
         this.level = level;
     }
 
@@ -71,11 +71,11 @@ public class Internship {
         this.visibility = visibility;
     }
 
-    public String getStatus() {
+    public InternshipStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(InternshipStatus status) {
         this.status = status;
     }
 

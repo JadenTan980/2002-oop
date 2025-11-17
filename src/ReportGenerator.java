@@ -1,9 +1,9 @@
 import java.util.List;
 
 public class ReportGenerator {
-    public void generateByStatus(List<Internship> internships, String status) {
+    public void generateByStatus(List<Internship> internships, InternshipStatus status) {
         long count = internships.stream()
-                .filter(i -> status.equalsIgnoreCase(i.getStatus()))
+                .filter(i -> i.getStatus() == status)
                 .count();
         System.out.println("Internships with status " + status + ": " + count);
     }
@@ -15,9 +15,9 @@ public class ReportGenerator {
         System.out.println("Internships for major " + major + ": " + count);
     }
 
-    public void generateByLevel(List<Internship> internships, String level) {
+    public void generateByLevel(List<Internship> internships, InternshipLevel level) {
         long count = internships.stream()
-                .filter(i -> level.equalsIgnoreCase(i.getLevel()))
+                .filter(i -> i.getLevel() == level)
                 .count();
         System.out.println("Internships for level " + level + ": " + count);
     }

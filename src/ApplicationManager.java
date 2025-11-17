@@ -9,9 +9,9 @@ public class ApplicationManager {
         return application;
     }
 
-    public void updateStatus(Application app, String status) {
-        if (app != null) {
-            app.setStatus(status);
+    public void updateStatus(Application application, ApplicationStatus status) {
+        if (application != null && status != null) {
+            application.setStatus(status);
         }
     }
 

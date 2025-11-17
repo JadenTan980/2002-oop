@@ -3,7 +3,7 @@ import java.util.Date;
 public class Application {
     private final Student student;
     private final Internship internship;
-    private String status = "Pending";
+    private ApplicationStatus status = ApplicationStatus.PENDING;
     private final Date timestamp = new Date();
     private boolean withdrawalRequested;
 
@@ -20,11 +20,11 @@ public class Application {
         return internship;
     }
 
-    public String getStatus() {
+    public ApplicationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ApplicationStatus status) {
         this.status = status;
     }
 
@@ -37,11 +37,11 @@ public class Application {
     }
 
     public void markSuccessful() {
-        this.status = "Successful";
+        this.status = ApplicationStatus.SUCCESSFUL;
     }
 
     public void markUnsuccessful() {
-        this.status = "Unsuccessful";
+        this.status = ApplicationStatus.UNSUCCESSFUL;
     }
 
     public WithdrawalRequest requestWithdrawal(String reason) {

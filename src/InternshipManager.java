@@ -13,13 +13,13 @@ public class InternshipManager {
 
     public void approveInternship(Internship internship) {
         if (internship != null) {
-            internship.setStatus("Approved");
+            internship.setStatus(InternshipStatus.APPROVED);
         }
     }
 
     public void rejectInternship(Internship internship) {
         if (internship != null) {
-            internship.setStatus("Rejected");
+            internship.setStatus(InternshipStatus.REJECTED);
         }
     }
 

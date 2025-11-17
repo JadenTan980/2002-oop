@@ -7,13 +7,16 @@ public class CompanyRep extends User {
     private String department;
     private String position;
     private final List<Internship> internships = new ArrayList<>();
+    private boolean approved;
 
-    public CompanyRep(String userID, String name,
-                      String companyName, String department, String position) {
-        super(userID, name, User.DEFAULT_PASSWORD);
+    public CompanyRep(String userID, String name, String password,
+                      String companyName, String department, String position,
+                      boolean approved) {
+        super(userID, name, password);
         this.companyName = companyName;
         this.department = department;
         this.position = position;
+        this.approved = approved;
     }
 
     public String getCompanyName() {
@@ -45,5 +48,13 @@ public class CompanyRep extends User {
 
     public List<Internship> getInternships() {
         return internships;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 }

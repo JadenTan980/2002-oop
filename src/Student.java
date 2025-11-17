@@ -6,8 +6,8 @@ public class Student extends User {
     private String major;
     private final List<Application> applications = new ArrayList<>();
 
-    public Student(String userID, String name, int yearOfStudy, String major) {
-        super(userID, name, User.DEFAULT_PASSWORD);
+    public Student(String userID, String name, String password, int yearOfStudy, String major) {
+        super(userID, name, password);
         this.yearOfStudy = yearOfStudy;
         this.major = major;
     }
@@ -38,7 +38,7 @@ public class Student extends User {
         if (application == null) {
             return;
         }
-        application.setStatus("Withdrawn");
+        application.setStatus(ApplicationStatus.UNSUCCESSFUL);
     }
 
     public void acceptPlacement(Application application) {

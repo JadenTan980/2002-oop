@@ -1,8 +1,8 @@
 public class CareerCenterStaff extends User {
     private String staffDepartment;
 
-    public CareerCenterStaff(String userID, String name, String staffDepartment) {
-        super(userID, name, User.DEFAULT_PASSWORD);
+    public CareerCenterStaff(String userID, String name, String password, String staffDepartment) {
+        super(userID, name, password);
         this.staffDepartment = staffDepartment;
     }
 
@@ -16,13 +16,13 @@ public class CareerCenterStaff extends User {
 
     public void approveInternship(Internship internship) {
         if (internship != null) {
-            internship.setStatus("Approved");
+            internship.setStatus(InternshipStatus.APPROVED);
         }
     }
 
     public void rejectInternship(Internship internship) {
         if (internship != null) {
-            internship.setStatus("Rejected");
+            internship.setStatus(InternshipStatus.REJECTED);
         }
     }
 

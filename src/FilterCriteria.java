@@ -1,25 +1,26 @@
 import java.util.Date;
 
 public class FilterCriteria {
-    private String status;
+    private InternshipStatus status;
     private String preferredMajor;
-    private String level;
+    private InternshipLevel level;
     private Date closingDate;
 
     public FilterCriteria() {}
 
-    public FilterCriteria(String status, String preferredMajor, String level, Date closingDate) {
+    public FilterCriteria(InternshipStatus status, String preferredMajor,
+                          InternshipLevel level, Date closingDate) {
         this.status = status;
         this.preferredMajor = preferredMajor;
         this.level = level;
         this.closingDate = closingDate;
     }
 
-    public String getStatus() {
+    public InternshipStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(InternshipStatus status) {
         this.status = status;
     }
 
@@ -31,11 +32,11 @@ public class FilterCriteria {
         this.preferredMajor = preferredMajor;
     }
 
-    public String getLevel() {
+    public InternshipLevel getLevel() {
         return level;
     }
 
-    public void setLevel(String level) {
+    public void setLevel(InternshipLevel level) {
         this.level = level;
     }
 
@@ -51,13 +52,13 @@ public class FilterCriteria {
         if (internship == null) {
             return false;
         }
-        if (status != null && !status.equalsIgnoreCase(internship.getStatus())) {
+        if (status != null && internship.getStatus() != status) {
             return false;
         }
         if (preferredMajor != null && !preferredMajor.equalsIgnoreCase(internship.getPreferredMajor())) {
             return false;
         }
-        if (level != null && !level.equalsIgnoreCase(internship.getLevel())) {
+        if (level != null && internship.getLevel() != level) {
             return false;
         }
         if (closingDate != null && internship.getCloseDate() != null

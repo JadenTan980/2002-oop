@@ -2,7 +2,7 @@ public class WithdrawalRequest {
     private final Application application;
     private final Student student;
     private final String reason;
-    private String status = "Pending";
+    private WithdrawalStatus status = WithdrawalStatus.PENDING;
 
     public WithdrawalRequest(Application application, Student student, String reason) {
         this.application = application;
@@ -22,16 +22,16 @@ public class WithdrawalRequest {
         return reason;
     }
 
-    public String getStatus() {
+    public WithdrawalStatus getStatus() {
         return status;
     }
 
     public void approve() {
-        this.status = "Approved";
-        application.setStatus("Withdrawn");
+        this.status = WithdrawalStatus.WITHDRAWN;
+        application.setStatus(ApplicationStatus.UNSUCCESSFUL);
     }
 
     public void reject() {
-        this.status = "Rejected";
+        this.status = WithdrawalStatus.REJECTED;
     }
 }
