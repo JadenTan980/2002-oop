@@ -11,9 +11,12 @@ import entities.User;
 public class AuthController {
 
     private final UserRepositoryInterface userRepository;
+    private final NotificationController notificationController;
 
-    public AuthController(UserRepositoryInterface userRepository) {
+    public AuthController(UserRepositoryInterface userRepository,
+                          NotificationController notificationController) {
         this.userRepository = userRepository;
+        this.notificationController = notificationController;
     }
 
     public User login(String id, String password) {
@@ -21,7 +24,13 @@ public class AuthController {
         boolean authenticated = user != null && user.getPassword().equals(password);
         boolean approved = !(user instanceof CompanyRepresentative)
                 || ((CompanyRepresentative) user).isApproved();
-        return authenticated && approved ? user : null;
+        if (authenticated && approved) {
+            return user;
+        }
+        if (authenticated && !approved && user instanceof CompanyRepresentative) {
+            notificationController.notifyPendingApproval(user.getId());
+        }
+        return null;
     }
 
     public void logout(User user) {

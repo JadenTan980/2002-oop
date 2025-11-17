@@ -14,8 +14,8 @@ public class RegistrationPortal {
         this.registrationController = registrationController;
     }
 
-    public boolean registerStudent(String id, String name, int yearOfStudy, String major, String password) {
-        return registrationController.registerStudent(id, name, password, yearOfStudy, major);
+    public boolean registerStudent(String id, String name, int yearOfStudy, String major, String email, String password) {
+        return registrationController.registerStudent(id, name, password, yearOfStudy, major, email);
     }
 
     public boolean registerCompanyRepresentative(String email,
@@ -40,46 +40,31 @@ public class RegistrationPortal {
         System.out.println("Select user type to register (student/company/staff): ");
         String type = scanner.nextLine().trim().toLowerCase();
         switch (type) {
-            case "student":
-                handleStudentRegistration(scanner);
-                break;
-            case "company":
-                handleCompanyRegistration(scanner);
-                break;
-            case "staff":
-                handleStaffRegistration(scanner);
-                break;
-            default:
-                System.out.println("Unknown user type: " + type);
+            case "student" -> handleStudentRegistration(scanner);
+            case "company" -> handleCompanyRegistration(scanner);
+            case "staff" -> handleStaffRegistration(scanner);
+            default -> System.out.println("Unknown user type: " + type);
         }
     }
 
     private void handleStudentRegistration(Scanner scanner) {
-        System.out.print("Student ID: ");
-        String id = scanner.nextLine();
-        System.out.print("Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Year of Study (1-4): ");
-        int year = parseInteger(scanner.nextLine(), 1);
-        System.out.print("Major: ");
-        String major = scanner.nextLine();
+        String id = promptStudentId(scanner);
+        String name = promptNonEmpty("Name", scanner);
+        int year = promptYearOfStudy(scanner);
+        String major = promptNonEmpty("Major", scanner);
+        String email = promptEmail("Email", scanner);
         System.out.print("Password (leave blank for default): ");
         String password = scanner.nextLine();
-        boolean success = registerStudent(id, name, year, major, password);
+        boolean success = registerStudent(id, name, year, major, email, password);
         System.out.println(success ? "Student registered." : "Registration failed.");
     }
 
     private void handleCompanyRegistration(Scanner scanner) {
-        System.out.print("Company Rep Email/ID: ");
-        String id = scanner.nextLine();
-        System.out.print("Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Company Name: ");
-        String company = scanner.nextLine();
-        System.out.print("Department: ");
-        String department = scanner.nextLine();
-        System.out.print("Position: ");
-        String position = scanner.nextLine();
+        String id = promptEmail("Company Rep Email/ID", scanner);
+        String name = promptNonEmpty("Name", scanner);
+        String company = promptNonEmpty("Company Name", scanner);
+        String department = promptNonEmpty("Department", scanner);
+        String position = promptNonEmpty("Position", scanner);
         System.out.print("Password (leave blank for default): ");
         String password = scanner.nextLine();
         boolean success = registerCompanyRepresentative(id, name, company, department, position, password);
@@ -87,23 +72,64 @@ public class RegistrationPortal {
     }
 
     private void handleStaffRegistration(Scanner scanner) {
-        System.out.print("Staff ID: ");
-        String id = scanner.nextLine();
-        System.out.print("Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Department: ");
-        String department = scanner.nextLine();
+        String id = promptNonEmpty("Staff ID", scanner);
+        String name = promptNonEmpty("Name", scanner);
+        String department = promptNonEmpty("Department", scanner);
         System.out.print("Password (leave blank for default): ");
         String password = scanner.nextLine();
         boolean success = registerCareerStaff(id, name, department, password);
         System.out.println(success ? "Career center staff registered." : "Registration failed.");
     }
 
-    private int parseInteger(String value, int fallback) {
-        try {
-            return Integer.parseInt(value.trim());
-        } catch (NumberFormatException e) {
-            return fallback;
+    private String promptStudentId(Scanner scanner) {
+        while (true) {
+            System.out.print("Student ID (Format: U1234567X): ");
+            String id = scanner.nextLine().trim();
+            if (registrationController.isValidStudentIdFormat(id)) {
+                return id;
+            }
+            System.out.println("Invalid student ID format. Please try again.");
         }
+    }
+
+    private String promptNonEmpty(String label, Scanner scanner) {
+        while (true) {
+            System.out.print(label + ": ");
+            String value = scanner.nextLine().trim();
+            if (!value.isEmpty()) {
+                return value;
+            }
+            System.out.println(label + " cannot be empty. Please try again.");
+        }
+    }
+
+    private int promptYearOfStudy(Scanner scanner) {
+        while (true) {
+            System.out.print("Year of Study (1-4): ");
+            String value = scanner.nextLine().trim();
+            try {
+                int year = Integer.parseInt(value);
+                if (year >= 1 && year <= 4) {
+                    return year;
+                }
+            } catch (NumberFormatException ignored) {
+            }
+            System.out.println("Invalid year. Enter a number from 1 to 4.");
+        }
+    }
+
+    private String promptEmail(String label, Scanner scanner) {
+        while (true) {
+            System.out.print(label + ": ");
+            String email = scanner.nextLine().trim();
+            if (isValidEmail(email)) {
+                return email;
+            }
+            System.out.println("Invalid email. Please enter a valid email address.");
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.contains("@") && email.contains(".") && !email.startsWith("@");
     }
 }

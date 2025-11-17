@@ -4,6 +4,7 @@ import control.ApplicationController;
 import control.CompanyRepController;
 import control.FilterController;
 import control.InternshipController;
+import entities.CompanyRepresentative;
 
 /**
  * Boundary for company representatives to manage opportunities and applications.
@@ -25,8 +26,13 @@ public class CompanyRepPortal {
         this.filterController = filterController;
     }
 
-    public void createOpportunity() {
-        // Collect opportunity details and forward to controller.
+    public void displayMenu(CompanyRepresentative representative) {
+        System.out.println("Welcome company representative " + representative.getName());
+        if (!representative.isApproved()) {
+            System.out.println("Your account is pending approval. No actions are available until a career center staff approves your registration.");
+            return;
+        }
+        // Placeholder for menu interaction.
     }
 
     public void toggleVisibility(String opportunityId) {

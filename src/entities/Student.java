@@ -11,6 +11,7 @@ public class Student extends User {
 
     private int yearOfStudy;
     private String major;
+    private String email;
     private final List<InternshipApplication> applications = new ArrayList<>();
 
     public Student(String id, String name, String password, int yearOfStudy, String major) {
@@ -33,6 +34,14 @@ public class Student extends User {
 
     public void setMajor(String major) {
         this.major = major;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public boolean addApplication(InternshipApplication application) {

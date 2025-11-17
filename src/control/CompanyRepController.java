@@ -20,7 +20,7 @@ public class CompanyRepController {
 
     public void submitOpportunity(CompanyRepresentative representative,
                                   InternshipOpportunity opportunity) {
-        if (representative == null || opportunity == null) {
+        if (!canManage(representative) || opportunity == null) {
             return;
         }
         opportunity.setOwner(representative);
@@ -29,7 +29,7 @@ public class CompanyRepController {
 
     public void updateStatus(CompanyRepresentative representative,
                              InternshipOpportunity opportunity) {
-        if (representative == null || opportunity == null) {
+        if (!canManage(representative) || opportunity == null) {
             return;
         }
         internshipController.updateOpportunity(opportunity);
@@ -40,6 +40,14 @@ public class CompanyRepController {
         if (application == null || status == null) {
             return;
         }
+        InternshipOpportunity opportunity = application.getOpportunity();
+        if (opportunity == null || !canManage(opportunity.getOwner())) {
+            return;
+        }
         applicationController.updateStatus(application.getId(), status);
+    }
+
+    private boolean canManage(CompanyRepresentative representative) {
+        return representative != null && representative.isApproved();
     }
 }

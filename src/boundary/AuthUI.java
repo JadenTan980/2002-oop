@@ -1,6 +1,9 @@
 package boundary;
 
 import control.AuthController;
+import entities.CareerCenterStaff;
+import entities.CompanyRepresentative;
+import entities.Student;
 import entities.User;
 
 /**
@@ -9,9 +12,18 @@ import entities.User;
 public class AuthUI {
 
     private final AuthController authController;
+    private final StudentPortal studentPortal;
+    private final CompanyRepPortal companyRepPortal;
+    private final CareerCenterPortal careerCenterPortal;
 
-    public AuthUI(AuthController authController) {
+    public AuthUI(AuthController authController,
+                  StudentPortal studentPortal,
+                  CompanyRepPortal companyRepPortal,
+                  CareerCenterPortal careerCenterPortal) {
         this.authController = authController;
+        this.studentPortal = studentPortal;
+        this.companyRepPortal = companyRepPortal;
+        this.careerCenterPortal = careerCenterPortal;
     }
 
     public void displayLogin() {
@@ -23,6 +35,14 @@ public class AuthUI {
     }
 
     public void routeUser(User user) {
-        // Placeholder to redirect authenticated user to the correct portal.
+        if (user instanceof Student) {
+            studentPortal.showDashboard((Student) user);
+        } else if (user instanceof CompanyRepresentative) {
+            companyRepPortal.displayMenu((CompanyRepresentative) user);
+        } else if (user instanceof CareerCenterStaff) {
+            careerCenterPortal.displayMenu((CareerCenterStaff) user);
+        } else {
+            System.out.println("Unknown user type: " + user.getClass().getSimpleName());
+        }
     }
 }

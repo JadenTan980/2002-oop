@@ -22,22 +22,24 @@ public class CareerCenterController {
         this.applicationController = applicationController;
     }
 
-    public void approveRepresentative(String repId) {
-        CompanyRepresentative representative =
-                (CompanyRepresentative) userRepository.findById(repId);
-        if (representative != null) {
-            representative.setApproved(true);
-            userRepository.save(representative);
+    public boolean approveRepresentative(String repId) {
+        CompanyRepresentative representative = findRepresentative(repId);
+        if (representative == null) {
+            return false;
         }
+        representative.setApproved(true);
+        userRepository.save(representative);
+        return true;
     }
 
-    public void rejectRepresentative(String repId) {
-        CompanyRepresentative representative =
-                (CompanyRepresentative) userRepository.findById(repId);
-        if (representative != null) {
-            representative.setApproved(false);
-            userRepository.save(representative);
+    public boolean rejectRepresentative(String repId) {
+        CompanyRepresentative representative = findRepresentative(repId);
+        if (representative == null) {
+            return false;
         }
+        representative.setApproved(false);
+        userRepository.save(representative);
+        return true;
     }
 
     public void approveOpportunity(String opportunityId) {
@@ -59,5 +61,12 @@ public class CareerCenterController {
             applicationController.updateStatus(applicationId,
                     InternshipApplication.ApplicationStatus.PENDING);
         }
+    }
+
+    private CompanyRepresentative findRepresentative(String id) {
+        if (id == null) {
+            return null;
+        }
+        return (CompanyRepresentative) userRepository.findById(id);
     }
 }
