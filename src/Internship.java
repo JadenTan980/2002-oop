@@ -1,5 +1,5 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Internship {
@@ -7,8 +7,8 @@ public class Internship {
     private final String description;
     private InternshipLevel level;
     private String preferredMajor;
-    private Date openDate;
-    private Date closeDate;
+    private LocalDate openDate;
+    private LocalDate closeDate;
     private boolean visibility = true;
     private InternshipStatus status = InternshipStatus.PENDING;
     private final String companyName;
@@ -47,23 +47,23 @@ public class Internship {
         this.preferredMajor = preferredMajor;
     }
 
-    public Date getOpenDate() {
+    public LocalDate getOpenDate() {
         return openDate;
     }
 
-    public void setOpenDate(Date openDate) {
+    public void setOpenDate(LocalDate openDate) {
         this.openDate = openDate;
     }
 
-    public Date getCloseDate() {
+    public LocalDate getCloseDate() {
         return closeDate;
     }
 
-    public void setCloseDate(Date closeDate) {
+    public void setCloseDate(LocalDate closeDate) {
         this.closeDate = closeDate;
     }
 
-    public boolean isVisibility() {
+    public boolean isVisible() {
         return visibility;
     }
 
@@ -109,5 +109,17 @@ public class Internship {
 
     public void toggleVisibility(boolean on) {
         this.visibility = on;
+    }
+
+    public boolean isFull() {
+        if (slots.isEmpty()) {
+            return false;
+        }
+        for (InternshipSlot slot : slots) {
+            if (slot.getAssignedStudent() == null) {
+                return false;
+            }
+        }
+        return true;
     }
 }

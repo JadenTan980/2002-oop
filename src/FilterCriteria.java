@@ -1,15 +1,15 @@
-import java.util.Date;
+import java.time.LocalDate;
 
 public class FilterCriteria {
     private InternshipStatus status;
     private String preferredMajor;
     private InternshipLevel level;
-    private Date closingDate;
+    private LocalDate closingDate;
 
     public FilterCriteria() {}
 
     public FilterCriteria(InternshipStatus status, String preferredMajor,
-                          InternshipLevel level, Date closingDate) {
+                          InternshipLevel level, LocalDate closingDate) {
         this.status = status;
         this.preferredMajor = preferredMajor;
         this.level = level;
@@ -40,11 +40,11 @@ public class FilterCriteria {
         this.level = level;
     }
 
-    public Date getClosingDate() {
+    public LocalDate getClosingDate() {
         return closingDate;
     }
 
-    public void setClosingDate(Date closingDate) {
+    public void setClosingDate(LocalDate closingDate) {
         this.closingDate = closingDate;
     }
 
@@ -62,7 +62,7 @@ public class FilterCriteria {
             return false;
         }
         if (closingDate != null && internship.getCloseDate() != null
-                && internship.getCloseDate().after(closingDate)) {
+                && internship.getCloseDate().isAfter(closingDate)) {
             return false;
         }
         return true;

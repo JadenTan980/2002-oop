@@ -46,4 +46,13 @@ public class Student extends User {
             application.markSuccessful();
         }
     }
+
+    public boolean hasAcceptedPlacement() {
+        for (Application application : applications) {
+            if (application.getStatus() == ApplicationStatus.SUCCESSFUL) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
