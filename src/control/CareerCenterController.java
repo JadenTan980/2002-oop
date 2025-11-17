@@ -1,20 +1,20 @@
 package control;
 
+import boundary.UserRepositoryInterface;
 import entities.CompanyRepresentative;
 import entities.InternshipApplication;
 import entities.InternshipOpportunity;
-import repository.UserRepository;
 
 /**
  * Implements approval logic for staff.
  */
 public class CareerCenterController {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryInterface userRepository;
     private final InternshipController internshipController;
     private final ApplicationController applicationController;
 
-    public CareerCenterController(UserRepository userRepository,
+    public CareerCenterController(UserRepositoryInterface userRepository,
                                   InternshipController internshipController,
                                   ApplicationController applicationController) {
         this.userRepository = userRepository;

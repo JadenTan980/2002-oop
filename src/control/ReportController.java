@@ -2,22 +2,22 @@ package control;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import boundary.ApplicationRepositoryInterface;
+import boundary.InternshipRepositoryInterface;
 import entities.InternshipApplication;
 import entities.InternshipOpportunity;
 import entities.ReportCriteria;
-import repository.ApplicationRepository;
-import repository.InternshipRepository;
 
 /**
  * Builds reports for the career center staff.
  */
 public class ReportController {
 
-    private final InternshipRepository internshipRepository;
-    private final ApplicationRepository applicationRepository;
+    private final InternshipRepositoryInterface internshipRepository;
+    private final ApplicationRepositoryInterface applicationRepository;
 
-    public ReportController(InternshipRepository internshipRepository,
-                            ApplicationRepository applicationRepository) {
+    public ReportController(InternshipRepositoryInterface internshipRepository,
+                            ApplicationRepositoryInterface applicationRepository) {
         this.internshipRepository = internshipRepository;
         this.applicationRepository = applicationRepository;
     }

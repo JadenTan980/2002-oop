@@ -1,7 +1,7 @@
 package control;
 
 import java.util.List;
-import repository.ApplicationRepository;
+import boundary.ApplicationRepositoryInterface;
 import entities.InternshipApplication;
 import entities.InternshipOpportunity;
 import entities.Student;
@@ -11,9 +11,9 @@ import entities.Student;
  */
 public class ApplicationController {
 
-    private final ApplicationRepository applicationRepository;
+    private final ApplicationRepositoryInterface applicationRepository;
 
-    public ApplicationController(ApplicationRepository applicationRepository) {
+    public ApplicationController(ApplicationRepositoryInterface applicationRepository) {
         this.applicationRepository = applicationRepository;
     }
 

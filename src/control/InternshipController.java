@@ -3,17 +3,17 @@ package control;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import boundary.InternshipRepositoryInterface;
 import entities.InternshipOpportunity;
-import repository.InternshipRepository;
 
 /**
  * Handles lifecycle of internship opportunities.
  */
 public class InternshipController {
 
-    private final InternshipRepository internshipRepository;
+    private final InternshipRepositoryInterface internshipRepository;
 
-    public InternshipController(InternshipRepository internshipRepository) {
+    public InternshipController(InternshipRepositoryInterface internshipRepository) {
         this.internshipRepository = internshipRepository;
     }
 

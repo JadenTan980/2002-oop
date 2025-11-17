@@ -1,18 +1,18 @@
 package control;
 
 import java.util.List;
+import boundary.FilterPreferenceStoreInterface;
 import entities.FilterPreference;
 import entities.InternshipOpportunity;
-import repository.FilterPreferenceStore;
 
 /**
  * Applies filters and persists per-user preferences.
  */
 public class FilterController {
 
-    private final FilterPreferenceStore store;
+    private final FilterPreferenceStoreInterface store;
 
-    public FilterController(FilterPreferenceStore store) {
+    public FilterController(FilterPreferenceStoreInterface store) {
         this.store = store;
     }
 

@@ -1,18 +1,18 @@
 package control;
 
 import java.io.File;
-import entities.User;
+import boundary.UserRepositoryInterface;
 import entities.CompanyRepresentative;
-import repository.UserRepository;
+import entities.User;
 
 /**
  * Handles authentication-related use cases for all user types.
  */
 public class AuthController {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryInterface userRepository;
 
-    public AuthController(UserRepository userRepository) {
+    public AuthController(UserRepositoryInterface userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -39,16 +39,5 @@ public class AuthController {
 
     public void loadUsersFromFile(File file) {
         userRepository.loadFromFile(file);
-    }
-
-    public boolean registerUser(User user) {
-        if (user == null || user.getId() == null || userRepository.findById(user.getId()) != null) {
-            return false;
-        }
-        if (user.getPassword() == null || user.getPassword().isEmpty()) {
-            user.setPassword("password");
-        }
-        userRepository.save(user);
-        return true;
     }
 }

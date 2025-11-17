@@ -4,7 +4,6 @@ import control.ApplicationController;
 import control.CompanyRepController;
 import control.FilterController;
 import control.InternshipController;
-import entities.CompanyRepresentative;
 
 /**
  * Boundary for company representatives to manage opportunities and applications.
@@ -24,19 +23,6 @@ public class CompanyRepPortal {
         this.internshipController = internshipController;
         this.applicationController = applicationController;
         this.filterController = filterController;
-    }
-
-    public void registerCompanyRep(String email,
-                                   String name,
-                                   String companyName,
-                                   String department,
-                                   String position) {
-        CompanyRepresentative representative =
-                new CompanyRepresentative(email, name, "password", companyName, department, position);
-        boolean success = companyRepController.register(representative);
-        if (!success) {
-            // Display validation error to user.
-        }
     }
 
     public void createOpportunity() {
