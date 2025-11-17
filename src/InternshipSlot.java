@@ -1,0 +1,20 @@
+public class InternshipSlot {
+    private final int slotNumber;
+    private Student assignedStudent;
+
+    public InternshipSlot(int slotNumber) {
+        this.slotNumber = slotNumber;
+    }
+
+    public int getSlotNumber() {
+        return slotNumber;
+    }
+
+    public Student getAssignedStudent() {
+        return assignedStudent;
+    }
+
+    public void assignStudent(Student student) {
+        this.assignedStudent = student;
+    }
+}
