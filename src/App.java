@@ -51,8 +51,7 @@ public class App {
             System.out.println("=== Internship Hub ===");
             System.out.println("1. Login");
             System.out.println("2. Register");
-            System.out.println("3. Reload user data");
-            System.out.println("4. Quit");
+            System.out.println("3. Quit");
             System.out.print("Select an option: ");
             String choice = scanner.nextLine().trim();
             switch (choice) {
@@ -63,8 +62,7 @@ public class App {
                     }
                 }
                 case "2" -> handleRegistration();
-                case "3" -> reloadData();
-                case "4" -> running = false;
+                case "3" -> running = false;
                 default -> System.out.println("Invalid choice. Please try again.");
             }
             System.out.println();
@@ -82,11 +80,6 @@ public class App {
         } catch (IllegalStateException e) {
             System.err.println("Failed to load user data: " + e.getMessage());
         }
-    }
-
-    private void reloadData() {
-        System.out.println("Reloading users from CSV files...");
-        loadInitialUsers();
     }
 
 
@@ -384,7 +377,8 @@ public class App {
             System.out.println("3. View my applications");
             System.out.println("4. Request withdrawal");
             System.out.println("5. Accept an offer");
-            System.out.println("6. Back to main menu");
+            System.out.println("6. Change password");
+            System.out.println("7. Back to main menu");
             System.out.print("Choice: ");
             String choice = scanner.nextLine().trim();
             switch (choice) {
@@ -393,7 +387,8 @@ public class App {
                 case "3" -> showStudentApplications(student);
                 case "4" -> handleStudentWithdrawal(student);
                 case "5" -> handleAcceptOffer(student);
-                case "6" -> exit = true;
+                case "6" -> handlePasswordChange(student);
+                case "7" -> exit = true;
                 default -> System.out.println("Unknown option.");
             }
         }
@@ -516,7 +511,8 @@ public class App {
             System.out.println("2. Create a new internship");
             System.out.println("3. Toggle internship visibility");
             System.out.println("4. Review applications");
-            System.out.println("5. Back to main menu");
+            System.out.println("5. Change password");
+            System.out.println("6. Back to main menu");
             System.out.print("Choice: ");
             String choice = scanner.nextLine().trim();
             switch (choice) {
@@ -524,7 +520,8 @@ public class App {
                 case "2" -> handleRepCreateInternship(rep);
                 case "3" -> handleToggleVisibility(rep);
                 case "4" -> handleRepReviewApplications(rep);
-                case "5" -> exit = true;
+                case "5" -> handlePasswordChange(rep);
+                case "6" -> exit = true;
                 default -> System.out.println("Unknown option.");
             }
         }
@@ -627,7 +624,8 @@ public class App {
             System.out.println("2. Review internship submissions");
             System.out.println("3. Process withdrawal requests");
             System.out.println("4. Generate reports");
-            System.out.println("5. Back to main menu");
+            System.out.println("5. Change password");
+            System.out.println("6. Back to main menu");
             System.out.print("Choice: ");
             String choice = scanner.nextLine().trim();
             switch (choice) {
@@ -635,7 +633,8 @@ public class App {
                 case "2" -> reviewInternshipSubmissions(staff);
                 case "3" -> processWithdrawalRequests(staff);
                 case "4" -> showReportsMenu();
-                case "5" -> exit = true;
+                case "5" -> handlePasswordChange(staff);
+                case "6" -> exit = true;
                 default -> System.out.println("Unknown option.");
             }
         }
@@ -826,6 +825,28 @@ public class App {
             return null;
         }
         return applications.get(choice - 1);
+    }
+
+    private void handlePasswordChange(User user) {
+        while (true) {
+            String newPassword = readPassword("New password (min 8 chars, type 'cancel' to exit)");
+            if ("cancel".equalsIgnoreCase(newPassword)) {
+                System.out.println("Password change cancelled.");
+                return;
+            }
+            String confirm = readPassword("Confirm new password");
+            if (!newPassword.equals(confirm)) {
+                System.out.println("Passwords do not match. Try again.");
+                continue;
+            }
+            try {
+                user.changePassword(newPassword);
+                System.out.println("Password updated successfully.");
+                return;
+            } catch (IllegalArgumentException e) {
+                System.out.println("Unable to change password: " + e.getMessage());
+            }
+        }
     }
 
     private LocalDate readOptionalDate(String prompt) {
