@@ -34,8 +34,11 @@ public class ApplicationManager {
             return;
         }
         application.setStatus(status);
-        if (status == ApplicationStatus.SUCCESSFUL && confirmOffer) {
-            assignSlot(application);
+        if (status == ApplicationStatus.SUCCESSFUL) {
+            markOtherApplications(application);
+            if (confirmOffer) {
+                assignSlot(application);
+            }
         } else if (status == ApplicationStatus.UNSUCCESSFUL) {
             releaseSlot(application);
         }
@@ -130,6 +133,15 @@ public class ApplicationManager {
                 slot.release();
                 internship.setStatus(InternshipStatus.APPROVED);
                 break;
+            }
+        }
+    }
+
+    private void markOtherApplications(Application acceptedApplication) {
+        Student student = acceptedApplication.getStudent();
+        for (Application application : student.getApplications()) {
+            if (application != acceptedApplication) {
+                application.setStatus(ApplicationStatus.WITHDRAWN);
             }
         }
     }
