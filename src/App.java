@@ -32,15 +32,9 @@ public class App {
     private final String companyDataPath;
 
     public App() {
-        this(System.getProperty("students.file", "data/sample_student_list.csv"),
-                System.getProperty("staff.file", "data/sample_staff_list.csv"),
-                System.getProperty("reps.file", "data/sample_company_representative_list.csv"));
-    }
-
-    public App(String studentDataPath, String staffDataPath, String companyDataPath) {
-        this.studentDataPath = studentDataPath;
-        this.staffDataPath = staffDataPath;
-        this.companyDataPath = companyDataPath;
+        this.studentDataPath = "data/sample_student_list.csv";
+        this.staffDataPath = "data/sample_staff_list.csv";
+        this.companyDataPath = "data/sample_company_representative_list.csv";
         loadInitialUsers();
     }
 

@@ -45,7 +45,7 @@ public class WithdrawalRequest {
 
     public void approve() {
         transition(WithdrawalStatus.WITHDRAWN);
-        application.setStatus(ApplicationStatus.UNSUCCESSFUL);
+        application.setStatus(ApplicationStatus.WITHDRAWN);
     }
 
     public void reject() {
