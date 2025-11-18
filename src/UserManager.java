@@ -91,11 +91,6 @@ public class UserManager {
     }
 
     public boolean registerCompanyRep(String id, String name, String password,
-                                      String companyName, String department, String position) {
-        return registerCompanyRep(id, name, password, companyName, department, position, false);
-    }
-
-    public boolean registerCompanyRep(String id, String name, String password,
                                       String companyName, String department, String position,
                                       boolean approved) {
         if (id == null || !EMAIL_PATTERN.matcher(id.trim()).matches()) {
