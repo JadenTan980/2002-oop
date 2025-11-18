@@ -45,7 +45,7 @@ The system skeleton is in place, but every function still needs to be expanded t
 - `enforceRules`: extend with additional requirements (visibility even after closing if student already applied, ability to view statuses, etc.) and extract messages describing which rule blocked the user.
 
 **WithdrawalManager**
-- `submitRequest`: capture reasons, timestamps, and ensure duplicate requests are prevented.
+- `submitRequest`: capture reasons and ensure duplicate requests are prevented.
 - `processRequest`: let staff approve or reject based on workload, update applications, and free up slots when withdrawals are accepted.
 
 **Student / CompanyRep interactions**

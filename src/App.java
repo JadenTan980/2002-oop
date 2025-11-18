@@ -79,10 +79,6 @@ public class App {
         }
     }
 
-    private void reloadData() {
-        System.out.println("Reloading users from CSV files...");
-        loadInitialUsers();
-    }
 
     private User promptLogin() {
         int attempts = 0;
