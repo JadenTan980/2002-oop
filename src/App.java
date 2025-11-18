@@ -25,6 +25,7 @@ public class App {
     private final UserManager userManager = new UserManager();
     private final InternshipManager internshipManager = new InternshipManager();
     private final ApplicationManager applicationManager = new ApplicationManager();
+    private final NotificationManager notificationManager = new NotificationManager();
     private final WithdrawalManager withdrawalManager = new WithdrawalManager();
     private final ReportGenerator reportGenerator = new ReportGenerator();
     private final Scanner scanner = new Scanner(System.in);
@@ -37,6 +38,7 @@ public class App {
         this.staffDataPath = "data/sample_staff_list.csv";
         this.companyDataPath = "data/sample_company_representative_list.csv";
         loadInitialUsers();
+        applicationManager.setNotificationManager(notificationManager);
     }
 
     public static void main(String[] args) {
@@ -240,6 +242,8 @@ public class App {
         if (registered) {
             persistCompanyRepRecord(id, name, companyName, department, position);
             System.out.println("Registration submitted. A Career Center Staff member must approve your account before you can log in.");
+            notifyCareerCenterStaff("New company representative registration awaiting approval: "
+                    + name + " (" + id + ") from " + companyName + ".");
         } else {
             System.out.println("Registration failed. Ensure all fields are valid and the ID has not been used.");
         }
@@ -368,6 +372,7 @@ public class App {
     public void showStudentMenu(Student student) {
         boolean exit = false;
         while (!exit) {
+            displayNotifications(student);
             System.out.println("\n=== Student Portal: " + student.getName() + " ===");
             System.out.println("1. Browse internships");
             System.out.println("2. Apply to an internship");
@@ -464,6 +469,8 @@ public class App {
         try {
             WithdrawalRequest request = student.withdraw(target, withdrawalManager, reason);
             System.out.println("Withdrawal requested. Reference: " + request.getRequestedOn());
+            notifyCareerCenterStaff("Withdrawal request submitted by " + student.getName()
+                    + " for " + target.getInternship().getTitle() + ".");
         } catch (Exception e) {
             System.out.println("Unable to request withdrawal: " + e.getMessage());
         }
@@ -503,6 +510,7 @@ public class App {
         }
         boolean exit = false;
         while (!exit) {
+            displayNotifications(rep);
             System.out.println("\n=== Company Rep Dashboard: " + rep.getName() + " ===");
             System.out.println("1. View my internships");
             System.out.println("2. Create a new internship");
@@ -616,6 +624,7 @@ public class App {
     public void showStaffMenu(CareerCenterStaff staff) {
         boolean exit = false;
         while (!exit) {
+            displayNotifications(staff);
             System.out.println("\n=== Career Center Console: " + staff.getName() + " ===");
             System.out.println("1. Review company representative accounts");
             System.out.println("2. Review internship submissions");
@@ -659,12 +668,14 @@ public class App {
             staff.approveRepAccount(userManager, request);
             updateCompanyRepApproval(request.getRep().getUserID(), true);
             System.out.println("Account approved for " + request.getRep().getUserID());
+            notifyRepAccountDecision(request.getRep(), true, null);
         } else {
             System.out.print("Reason for rejection: ");
             String notes = scanner.nextLine().trim();
             staff.rejectRepAccount(userManager, request, notes);
             updateCompanyRepApproval(request.getRep().getUserID(), false);
             System.out.println("Account rejected.");
+            notifyRepAccountDecision(request.getRep(), false, notes);
         }
     }
 
@@ -879,6 +890,42 @@ public class App {
         }
         int choice = readInt("Select a status: ", 1, statuses.length);
         return statuses[choice - 1];
+    }
+
+    private void notifyCareerCenterStaff(String message) {
+        List<CareerCenterStaff> staffMembers = userManager.getCareerCenterStaffMembers();
+        notificationManager.notifyUsers(staffMembers, message);
+    }
+
+    private void notifyRepAccountDecision(CompanyRep rep, boolean approved, String notes) {
+        if (rep == null) {
+            return;
+        }
+        String message;
+        if (approved) {
+            message = "Your company representative account has been approved. You may now log in.";
+        } else {
+            message = "Your company representative account was rejected.";
+            if (notes != null && !notes.isBlank()) {
+                message += " Reason: " + notes;
+            }
+        }
+        notificationManager.notifyUser(rep, message);
+    }
+
+    private void displayNotifications(User user) {
+        if (user == null) {
+            return;
+        }
+        List<Notification> notifications = notificationManager.consumeNotifications(user);
+        if (notifications.isEmpty()) {
+            return;
+        }
+        System.out.println("\n--- Notifications ---");
+        for (Notification notification : notifications) {
+            System.out.println("* " + notification);
+        }
+        System.out.println("---------------------");
     }
 
     private List<Internship> fetchFilteredInternships(User user, Predicate<Internship> additionalFilter) {

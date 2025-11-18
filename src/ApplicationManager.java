@@ -8,6 +8,7 @@ public class ApplicationManager {
     private static final int MAX_ACTIVE_APPLICATIONS = 3;
     private final List<String> submissionNotifications = new ArrayList<>();
     private String Reason = "";
+    private NotificationManager notificationManager;
 
     public Application submitApplication(Student student, Internship internship) {
         if (student == null || internship == null) {
@@ -36,6 +37,9 @@ public class ApplicationManager {
         application.setStatus(status);
         if (status == ApplicationStatus.SUCCESSFUL) {
             markOtherApplications(application);
+            if (!confirmOffer) {
+                notifyStudentOfSuccessfulApplication(application);
+            }
             if (confirmOffer) {
                 assignSlot(application);
             }
@@ -111,6 +115,10 @@ public class ApplicationManager {
         return Reason;
     }
 
+    public void setNotificationManager(NotificationManager notificationManager) {
+        this.notificationManager = notificationManager;
+    }
+
     private void assignSlot(Application application) {
         Internship internship = application.getInternship();
         for (InternshipSlot slot : internship.getSlots()) {
@@ -142,6 +150,17 @@ public class ApplicationManager {
                 application.setStatus(ApplicationStatus.UNSUCCESSFUL);
             }
         }
+    }
+
+    private void notifyStudentOfSuccessfulApplication(Application application) {
+        if (notificationManager == null) {
+            return;
+        }
+        Student student = application.getStudent();
+        Internship internship = application.getInternship();
+        String message = "Application for " + internship.getTitle() + " at "
+                + internship.getCompanyName() + " is awaiting your acceptance.";
+        notificationManager.notifyUser(student, message);
     }
 
 }
