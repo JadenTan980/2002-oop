@@ -143,12 +143,11 @@ public class App {
     }
 
     private void routeUser(User user) {
-        if (user instanceof Student student) {
-            showStudentMenu(student);
-        } else if (user instanceof CompanyRep rep) {
-            showRepMenu(rep);
-        } else if (user instanceof CareerCenterStaff staff) {
-            showStaffMenu(staff);
+        switch (user) {
+            case Student student -> showStudentMenu(student);
+            case CompanyRep rep -> showRepMenu(rep);
+            case CareerCenterStaff staff -> showStaffMenu(staff);
+            default -> {}
         }
     }
 
