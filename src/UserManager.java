@@ -196,7 +196,7 @@ public class UserManager {
         return file != null && file.exists() && file.isFile();
     }
 
-    private int parseInt(String value, int fallback) {
+    private int parseInt(String value, int fallback) {// for reading year from student data
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
