@@ -29,6 +29,7 @@ public class App {
     private final WithdrawalManager withdrawalManager = new WithdrawalManager();
     private final ReportGenerator reportGenerator = new ReportGenerator();
     private final Scanner scanner = new Scanner(System.in);
+    private final SchoolMajorCatalog schoolMajorCatalog;
     private final String studentDataPath;
     private final String staffDataPath;
     private final String companyDataPath;
@@ -37,6 +38,7 @@ public class App {
         this.studentDataPath = "data/sample_student_list.csv";
         this.staffDataPath = "data/sample_staff_list.csv";
         this.companyDataPath = "data/sample_company_representative_list.csv";
+        this.schoolMajorCatalog = new SchoolMajorCatalog(new File("data/schools_and_majors.csv"));
         loadInitialUsers();
         applicationManager.setNotificationManager(notificationManager);
     }
@@ -192,8 +194,7 @@ public class App {
             System.out.println("Registration cancelled.");
             return;
         }
-        System.out.print("Major: ");
-        String major = scanner.nextLine().trim();
+        String major = promptStudentMajorSelection();
         if (!promptYesNo("Confirm registration? (y/n): ", true)) {
             System.out.println("Registration cancelled.");
             return;
@@ -242,8 +243,8 @@ public class App {
         if (registered) {
             persistCompanyRepRecord(id, name, companyName, department, position);
             System.out.println("Registration submitted. A Career Center Staff member must approve your account before you can log in.");
-            notifyCareerCenterStaff("New company representative registration awaiting approval: "
-                    + name + " (" + id + ") from " + companyName + ".");
+            notificationManager.notifyStaffNewRepRegistration(
+                    userManager.getCareerCenterStaffMembers(), name, id, companyName);
         } else {
             System.out.println("Registration failed. Ensure all fields are valid and the ID has not been used.");
         }
@@ -469,8 +470,8 @@ public class App {
         try {
             WithdrawalRequest request = student.withdraw(target, withdrawalManager, reason);
             System.out.println("Withdrawal requested. Reference: " + request.getRequestedOn());
-            notifyCareerCenterStaff("Withdrawal request submitted by " + student.getName()
-                    + " for " + target.getInternship().getTitle() + ".");
+            notificationManager.notifyStaffWithdrawalRequest(
+                    userManager.getCareerCenterStaffMembers(), student, target.getInternship());
         } catch (Exception e) {
             System.out.println("Unable to request withdrawal: " + e.getMessage());
         }
@@ -555,8 +556,7 @@ public class App {
         System.out.print("Description: ");
         String description = scanner.nextLine().trim();
         InternshipLevel level = promptInternshipLevel();
-        System.out.print("Preferred major (leave blank for any): ");
-        String preferredMajor = scanner.nextLine().trim();
+        String preferredMajor = promptPreferredMajorSelection();
         LocalDate openDate = readOptionalDate("Open date (yyyy-MM-dd, blank for immediate): ");
         LocalDate closeDate = readOptionalDate("Close date (yyyy-MM-dd, blank for none): ");
         int slots = readInt("Number of slots (1-10): ", 1, 10);
@@ -564,6 +564,8 @@ public class App {
             Internship internship = rep.createInternship(internshipManager, title, description,
                     level, preferredMajor, openDate, closeDate, slots);
             System.out.println("Internship submitted for review: " + internship.getTitle());
+            notificationManager.notifyStaffInternshipSubmission(
+                    userManager.getCareerCenterStaffMembers(), internship);
         } catch (Exception e) {
             System.out.println("Unable to create internship: " + e.getMessage());
         }
@@ -624,6 +626,7 @@ public class App {
     public void showStaffMenu(CareerCenterStaff staff) {
         boolean exit = false;
         while (!exit) {
+            queueStaffWorkloadAlerts(staff);
             displayNotifications(staff);
             System.out.println("\n=== Career Center Console: " + staff.getName() + " ===");
             System.out.println("1. Review company representative accounts");
@@ -668,14 +671,14 @@ public class App {
             staff.approveRepAccount(userManager, request);
             updateCompanyRepApproval(request.getRep().getUserID(), true);
             System.out.println("Account approved for " + request.getRep().getUserID());
-            notifyRepAccountDecision(request.getRep(), true, null);
+            notificationManager.notifyRepAccountDecision(request.getRep(), true, null);
         } else {
             System.out.print("Reason for rejection: ");
             String notes = scanner.nextLine().trim();
             staff.rejectRepAccount(userManager, request, notes);
             updateCompanyRepApproval(request.getRep().getUserID(), false);
             System.out.println("Account rejected.");
-            notifyRepAccountDecision(request.getRep(), false, notes);
+            notificationManager.notifyRepAccountDecision(request.getRep(), false, notes);
         }
     }
 
@@ -791,9 +794,7 @@ public class App {
             if (internship.getStatus() != InternshipStatus.APPROVED || !internship.isVisible() || internship.isFull()) {
                 continue;
             }
-            String preferredMajor = internship.getPreferredMajor();
-            if (preferredMajor != null && !preferredMajor.isBlank()
-                    && studentMajor != null && !preferredMajor.equalsIgnoreCase(studentMajor)) {
+            if (!internship.acceptsMajor(studentMajor)) {
                 continue;
             }
             InternshipLevel level = internship.getLevel();
@@ -892,25 +893,109 @@ public class App {
         return statuses[choice - 1];
     }
 
-    private void notifyCareerCenterStaff(String message) {
-        List<CareerCenterStaff> staffMembers = userManager.getCareerCenterStaffMembers();
-        notificationManager.notifyUsers(staffMembers, message);
+    private String promptStudentMajorSelection() {
+        String major = promptMajorSelectionFromCatalog(true, "Major: ");
+        while (major == null || major.isBlank()) {
+            System.out.println("Major cannot be empty.");
+            major = promptManualMajorInput("Major: ");
+        }
+        return major;
     }
 
-    private void notifyRepAccountDecision(CompanyRep rep, boolean approved, String notes) {
-        if (rep == null) {
-            return;
+    private String promptPreferredMajorSelection() {
+        if (!promptYesNo("Specify a preferred major? (y/n): ", false)) {
+            return "";
         }
-        String message;
-        if (approved) {
-            message = "Your company representative account has been approved. You may now log in.";
-        } else {
-            message = "Your company representative account was rejected.";
-            if (notes != null && !notes.isBlank()) {
-                message += " Reason: " + notes;
+        String major = promptMajorSelectionFromCatalog(true, "Preferred major: ");
+        return major == null ? "" : major;
+    }
+
+    private String promptMajorSelectionFromCatalog(boolean allowManualEntry, String manualPrompt) {
+        if (schoolMajorCatalog == null || schoolMajorCatalog.isEmpty()) {
+            return allowManualEntry ? promptManualMajorInput(manualPrompt) : null;
+        }
+        List<String> schools = schoolMajorCatalog.getSchools();
+        if (schools.isEmpty()) {
+            return allowManualEntry ? promptManualMajorInput(manualPrompt) : null;
+        }
+        while (true) {
+            System.out.println("\nSelect a school:");
+            for (int i = 0; i < schools.size(); i++) {
+                System.out.println((i + 1) + ". " + schools.get(i));
+            }
+            if (allowManualEntry) {
+                System.out.println("0. Enter major manually");
+            } else {
+                System.out.println("0. Cancel selection");
+            }
+            int choice = readInt("Choice: ", 0, schools.size());
+            if (choice == 0) {
+                return allowManualEntry ? promptManualMajorInput(manualPrompt) : null;
+            }
+            String school = schools.get(choice - 1);
+            String major = promptMajorSelectionForSchool(school);
+            if (major != null) {
+                return major;
             }
         }
-        notificationManager.notifyUser(rep, message);
+    }
+
+    private String promptMajorSelectionForSchool(String school) {
+        List<String> majors = schoolMajorCatalog.getMajorsForSchool(school);
+        if (majors.isEmpty()) {
+            System.out.println("No majors found for " + school + ". Please choose another school.");
+            return null;
+        }
+        while (true) {
+            System.out.println("\nSelect a major from " + school + ":");
+            for (int i = 0; i < majors.size(); i++) {
+                System.out.println((i + 1) + ". " + majors.get(i));
+            }
+            System.out.println("0. Back to school list");
+            int choice = readInt("Choice: ", 0, majors.size());
+            if (choice == 0) {
+                return null;
+            }
+            return majors.get(choice - 1);
+        }
+    }
+
+    private String promptManualMajorInput(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (!input.isBlank()) {
+                return input;
+            }
+            System.out.println("Input cannot be empty.");
+        }
+    }
+
+    private String formatPreferredMajors(Internship internship) {
+        if (internship == null) {
+            return "Any";
+        }
+        String preferred = internship.getPreferredMajor();
+        return preferred == null || preferred.isBlank() ? "Any" : preferred;
+    }
+
+    private void queueStaffWorkloadAlerts(CareerCenterStaff staff) {
+        if (staff == null) {
+            return;
+        }
+        int pendingInternships = countPendingInternshipSubmissions();
+        int pendingWithdrawals = withdrawalManager.getPendingRequests().size();
+        notificationManager.notifyStaffWorkloadReminder(staff, pendingInternships, pendingWithdrawals);
+    }
+
+    private int countPendingInternshipSubmissions() {
+        int count = 0;
+        for (Internship internship : internshipManager.getInternships()) {
+            if (internship.getStatus() == InternshipStatus.PENDING) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private void displayNotifications(User user) {
@@ -1022,7 +1107,7 @@ public class App {
         System.out.println(index + ". " + internship.getTitle() + " (" + internship.getCompanyName() + ")"
                 + " | Status: " + internship.getStatus()
                 + " | Level: " + internship.getLevel()
-                + " | Major: " + (internship.getPreferredMajor() == null ? "Any" : internship.getPreferredMajor())
+                + " | Major: " + formatPreferredMajors(internship)
                 + " | Visibility: " + (internship.isVisible() ? "On" : "Off")
                 + " | Slots: " + filledSlots + "/" + totalSlots);
     }

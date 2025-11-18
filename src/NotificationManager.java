@@ -27,6 +27,79 @@ public class NotificationManager {
         }
     }
 
+    public void notifyStaffNewRepRegistration(Collection<CareerCenterStaff> staff,
+                                              String repName, String repId, String companyName) {
+        if (staff == null || staff.isEmpty()) {
+            return;
+        }
+        String message = "New company representative registration awaiting approval: "
+                + repName + " (" + repId + ") from " + companyName + ".";
+        notifyUsers(staff, message);
+    }
+
+    public void notifyStaffWithdrawalRequest(Collection<CareerCenterStaff> staff,
+                                             Student student, Internship internship) {
+        if (staff == null || staff.isEmpty() || student == null || internship == null) {
+            return;
+        }
+        String message = "Withdrawal request submitted by " + student.getName()
+                + " for " + internship.getTitle() + ".";
+        notifyUsers(staff, message);
+    }
+
+    public void notifyStaffInternshipSubmission(Collection<CareerCenterStaff> staff,
+                                                Internship internship) {
+        if (staff == null || staff.isEmpty() || internship == null) {
+            return;
+        }
+        String message = "New internship submission pending review: "
+                + internship.getTitle() + " from " + internship.getCompanyName() + ".";
+        notifyUsers(staff, message);
+    }
+
+    public void notifyStaffWorkloadReminder(CareerCenterStaff staff,
+                                            int pendingInternships, int pendingWithdrawals) {
+        if (staff == null) {
+            return;
+        }
+        if (pendingInternships > 0) {
+            notifyUser(staff, pendingInternships + " internship submission(s) awaiting review.");
+        }
+        if (pendingWithdrawals > 0) {
+            notifyUser(staff, pendingWithdrawals + " withdrawal request(s) awaiting action.");
+        }
+    }
+
+    public void notifyRepAccountDecision(CompanyRep rep, boolean approved, String notes) {
+        if (rep == null) {
+            return;
+        }
+        String message;
+        if (approved) {
+            message = "Your company representative account has been approved. You may now log in.";
+        } else {
+            message = "Your company representative account was rejected.";
+            if (notes != null && !notes.isBlank()) {
+                message += " Reason: " + notes;
+            }
+        }
+        notifyUser(rep, message);
+    }
+
+    public void notifyStudentOfferAwaitingAcceptance(Application application) {
+        if (application == null) {
+            return;
+        }
+        Student student = application.getStudent();
+        Internship internship = application.getInternship();
+        if (student == null || internship == null) {
+            return;
+        }
+        String message = "Application for " + internship.getTitle()
+                + " at " + internship.getCompanyName() + " is awaiting your acceptance.";
+        notifyUser(student, message);
+    }
+
     public List<Notification> consumeNotifications(User user) {
         if (user == null) {
             return Collections.emptyList();

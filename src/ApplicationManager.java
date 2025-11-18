@@ -61,10 +61,8 @@ public class ApplicationManager {
             Reason = "Internship is currently hidden.";
             return false;
         }
-        String preferredMajor = internship.getPreferredMajor();
         String studentMajor = student.getMajor();
-        if (preferredMajor != null && !preferredMajor.isBlank()
-                && studentMajor != null && !preferredMajor.equalsIgnoreCase(studentMajor)) {
+        if (!internship.acceptsMajor(studentMajor)) {
             Reason = "Major does not match the preferred major for this internship.";
             return false;
         }
@@ -156,11 +154,7 @@ public class ApplicationManager {
         if (notificationManager == null) {
             return;
         }
-        Student student = application.getStudent();
-        Internship internship = application.getInternship();
-        String message = "Application for " + internship.getTitle() + " at "
-                + internship.getCompanyName() + " is awaiting your acceptance.";
-        notificationManager.notifyUser(student, message);
+        notificationManager.notifyStudentOfferAwaitingAcceptance(application);
     }
 
 }
