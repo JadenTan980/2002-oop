@@ -235,7 +235,7 @@ public class App {
             System.out.println("Registration cancelled.");
             return;
         }
-        boolean registered = userManager.registerCompanyRep(id, name, password, companyName, department, position);
+        boolean registered = userManager.registerCompanyRep(id, name, password, companyName, department, position, false);
         if (registered) {
             persistCompanyRepRecord(id, name, companyName, department, position);
             System.out.println("Registration submitted. A Career Center Staff member must approve your account before you can log in.");
