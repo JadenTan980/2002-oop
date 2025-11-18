@@ -24,12 +24,9 @@ public class UserManager {
     private String lastLoginMessage = "";
 
     public void loadAllUsers(File studentFile, File staffFile, File companyFile) {
-        removeBootstrapUsers();
-        bootstrapMode = true;
         loadStudents(studentFile);
         loadStaff(staffFile);
         loadCompanyRepresentatives(companyFile);
-        bootstrapMode = false;
     }
 
     public User login(String id, String pass) {
@@ -331,23 +328,6 @@ public class UserManager {
             System.err.println("Failed to parse number '" + value + "'. Using fallback " + fallback + ".");
             return fallback;
         }
-    }
-
-    private void removeBootstrapUsers() {
-        if (bootstrapUserIds.isEmpty()) {
-            return;
-        }
-        Set<String> snapshot = new HashSet<>(bootstrapUserIds);
-        Iterator<User> iterator = users.iterator();
-        while (iterator.hasNext()) {
-            User user = iterator.next();
-            if (snapshot.contains(user.getUserID().toLowerCase(Locale.ROOT))) {
-                iterator.remove();
-            }
-        }
-        accountRequests.removeIf(request ->
-                request.getRep() != null && snapshot.contains(request.getRep().getUserID().toLowerCase(Locale.ROOT)));
-        bootstrapUserIds.clear();
     }
 
     private User findUser(String id) {
