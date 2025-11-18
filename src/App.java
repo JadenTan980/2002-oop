@@ -1,5 +1,8 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -659,11 +662,13 @@ public class App {
         AccountRequest request = pending.get(choice - 1);
         if (promptYesNo("Approve this account? (y/n): ", true)) {
             staff.approveRepAccount(userManager, request);
+            updateCompanyRepApproval(request.getRep().getUserID(), true);
             System.out.println("Account approved for " + request.getRep().getUserID());
         } else {
             System.out.print("Reason for rejection: ");
             String notes = scanner.nextLine().trim();
             staff.rejectRepAccount(userManager, request, notes);
+            updateCompanyRepApproval(request.getRep().getUserID(), false);
             System.out.println("Account rejected.");
         }
     }
@@ -890,5 +895,50 @@ public class App {
                 + " | Major: " + (internship.getPreferredMajor() == null ? "Any" : internship.getPreferredMajor())
                 + " | Visibility: " + (internship.isVisible() ? "On" : "Off")
                 + " | Slots: " + filledSlots + "/" + totalSlots);
+    }
+
+    private void updateCompanyRepApproval(String repId, boolean approved) {
+        File file = new File(companyDataPath);
+        if (!file.exists() || repId == null || repId.isBlank()) {
+            return;
+        }
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to read representative file: " + e.getMessage());
+            return;
+        }
+
+        if (lines.size() <= 1) {
+            return;
+        }
+        boolean updated = false;
+        for (int i = 1; i < lines.size(); i++) {
+            String[] tokens = lines.get(i).split(",", -1);
+            if (tokens.length < 7) {
+                continue;
+            }
+            if (tokens[0].trim().equalsIgnoreCase(repId.trim())) {
+                tokens[6] = String.valueOf(approved);
+                lines.set(i, String.join(",", tokens));
+                updated = true;
+                break;
+            }
+        }
+        if (!updated) {
+            return;
+        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
+            for (String entry : lines) {
+                writer.write(entry);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to update representative file: " + e.getMessage());
+        }
     }
 }
