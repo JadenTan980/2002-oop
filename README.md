@@ -87,4 +87,12 @@ Once the core phases are complete, plan for these enhancements:
    - Allow students to provide rich-text comments explaining why they want to withdraw.
    - Expose those comments to both career center staff (while reviewing requests) and the students themselves for future reference.
 
+4. **Structured School/Major Selection**
+   - Replace free-form major input with a school-first, major-second selection flow during student registration.
+   - Represent schools and majors as enums (or a structured catalog) so filtering and internship creation can rely on consistent references.
+
+5. **Multiple Preferred Majors Per Internship**
+   - Allow company representatives to tag each internship with up to three preferred majors.
+   - Update application filtering and eligibility checks to match on any of the listed majors.
+
 Document these features alongside implementation details once they are in progress, so stakeholders understand their status and dependencies.
