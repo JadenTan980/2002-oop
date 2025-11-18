@@ -21,13 +21,10 @@ The system skeleton is in place, but every function still needs to be expanded t
 ## Phase 2 – User Loading & Registration Workflow
 
 **UserManager**
-- `UserManager#loadAllUsers`, `#loadStudents`, `#loadStaff`, `#loadCompanyRepresentatives`: harden CSV ingestion (validate ID formats, trim headers, guard against duplicates) and support additional metadata columns (emails, phone numbers, default majors/levels).
-- `UserManager#login`: add throttling, password hashing, and audit logs. Provide clearer error feedback (invalid ID vs wrong password vs pending approval).
+- `UserManager#loadAllUsers`, `#loadStudents`, `#loadStaff`, `#loadCompanyRepresentatives`: harden CSV ingestion (validate ID formats, trim headers, guard against duplicates).
 - `UserManager#getLastLoginMessage`: extend to return actionable hints for the CLI and future UI clients.
-- `UserManager#registerStudent`, `#registerCompanyRep`, `#registerCareerCenterStaff`: validate IDs per spec, hash passwords, and trigger welcome/approval notifications.
 - `UserManager#approveRepresentative`: update account + request objects atomically, log approver/time, and expose rejection path.
 - `UserManager#getPendingAccounts`: add pagination/filtering; ensure list stays consistent with persisted storage.
-- Private helpers `loadStudents`, `loadStaff`, `loadCompanyRepresentatives`, `addUser`, `userExists`, `isReadable`, `parseInt`: flesh out error reporting, move parsing to reusable utilities, and prep for future database integration.
 
 **App lifecycle**
 - `App#App()` / `App#loadInitialUsers`: make the file paths configurable, handle missing files gracefully, and support refresh/reload commands.
