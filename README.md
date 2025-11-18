@@ -70,3 +70,21 @@ The system skeleton is in place, but every function still needs to be expanded t
 - `App#showStaffMenu`: list pending rep accounts, internship submissions, withdrawal requests, and provide access to the reporting suite.
 
 By following these phases in order—first strengthening the core entities, then user management, then application workflows, and finally the UI/reporting layers—you can iteratively turn the current skeleton into the fully featured internship management platform described in the requirements. Track progress by checking off each function as you implement its behavior.
+
+## Additional Features
+
+Once the core phases are complete, plan for these enhancements:
+
+1. **Decision Notes Visibility**
+   - Surface `AccountRequest` decision notes to both the affected company representative (when they attempt to log in or view their profile) and to relevant students if a decision affects their applications.
+
+2. **Notification Framework**
+   - Notify students when an application transitions to “pending acceptance.”
+   - Notify career center staff when new withdrawal requests or representative account approvals await action.
+   - Notify company reps when their accounts are approved or rejected, including decision notes.
+
+3. **Withdrawal Comments**
+   - Allow students to provide rich-text comments explaining why they want to withdraw.
+   - Expose those comments to both career center staff (while reviewing requests) and the students themselves for future reference.
+
+Document these features alongside implementation details once they are in progress, so stakeholders understand their status and dependencies.

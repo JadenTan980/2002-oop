@@ -1,8 +1,12 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class CompanyRep extends User {
+    private static final int MAX_INTERNSHIPS = 5;
+    private static final int MAX_SLOTS = 10;
+
     private String companyName;
     private String department;
     private String position;
@@ -27,27 +31,54 @@ public class CompanyRep extends User {
         this.companyName = companyName;
     }
 
-    public Internship createInternship(String title, String description) {
+    public String getDepartment() {
+        return department;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public Internship createInternship(String title, String description,
+                                       InternshipLevel level, String preferredMajor,
+                                       LocalDate openDate, LocalDate closeDate,
+                                       int slotCount) {
+        ensureApproved();
+        if (internships.size() >= MAX_INTERNSHIPS) {
+            throw new IllegalStateException("Maximum number of internships reached.");
+        }
+        if (slotCount < 1 || slotCount > MAX_SLOTS) {
+            throw new IllegalArgumentException("Slot count must be between 1 and " + MAX_SLOTS);
+        }
         Internship internship = new Internship(title, description, companyName, this);
+        internship.setLevel(level);
+        internship.setPreferredMajor(preferredMajor);
+        internship.setOpenDate(openDate);
+        internship.setCloseDate(closeDate);
+        for (int i = 1; i <= slotCount; i++) {
+            internship.addSlot(new InternshipSlot(i));
+        }
         internships.add(internship);
         return internship;
     }
 
     public List<Application> viewApplications(Internship internship) {
-        if (internship == null) {
+        if (internship == null || !internships.contains(internship)) {
             return Collections.emptyList();
         }
-        return internship.getApplications();
+        return Collections.unmodifiableList(internship.getApplications());
     }
 
     public void toggleVisibility(Internship internship, boolean on) {
-        if (internship != null) {
-            internship.setVisibility(on);
+        ensureApproved();
+        if (internship == null || !internships.contains(internship)) {
+            throw new IllegalArgumentException("Internship not managed by this representative.");
         }
+        internship.toggleVisibility(on);
     }
 
     public List<Internship> getInternships() {
-        return internships;
+        return Collections.unmodifiableList(internships);
     }
 
     public boolean isApproved() {
@@ -56,5 +87,11 @@ public class CompanyRep extends User {
 
     public void setApproved(boolean approved) {
         this.approved = approved;
+    }
+
+    private void ensureApproved() {
+        if (!approved) {
+            throw new IllegalStateException("Company representative has not been approved yet.");
+        }
     }
 }

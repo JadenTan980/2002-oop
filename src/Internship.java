@@ -1,8 +1,10 @@
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Internship {
+    private static final int MAX_SLOTS = 10;
     private final String title;
     private final String description;
     private InternshipLevel level;
@@ -88,17 +90,21 @@ public class Internship {
     }
 
     public void addSlot(InternshipSlot slot) {
-        if (slot != null) {
-            slots.add(slot);
+        if (slot == null) {
+            return;
         }
+        if (slots.size() >= MAX_SLOTS) {
+            throw new IllegalStateException("Cannot add more than " + MAX_SLOTS + " slots.");
+        }
+        slots.add(slot);
     }
 
     public List<InternshipSlot> getSlots() {
-        return slots;
+        return Collections.unmodifiableList(slots);
     }
 
     public List<Application> getApplications() {
-        return applications;
+        return Collections.unmodifiableList(applications);
     }
 
     public void addApplication(Application application) {

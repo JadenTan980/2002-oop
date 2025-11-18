@@ -1,8 +1,13 @@
+import java.time.LocalDateTime;
+
 public class WithdrawalRequest {
     private final Application application;
     private final Student student;
     private final String reason;
+    private final LocalDateTime requestedOn = LocalDateTime.now();
     private WithdrawalStatus status = WithdrawalStatus.PENDING;
+    private CareerCenterStaff processedBy;
+    private LocalDateTime processedOn;
 
     public WithdrawalRequest(Application application, Student student, String reason) {
         this.application = application;
@@ -22,16 +27,37 @@ public class WithdrawalRequest {
         return reason;
     }
 
+    public LocalDateTime getRequestedOn() {
+        return requestedOn;
+    }
+
     public WithdrawalStatus getStatus() {
         return status;
     }
 
+    public CareerCenterStaff getProcessedBy() {
+        return processedBy;
+    }
+
+    public LocalDateTime getProcessedOn() {
+        return processedOn;
+    }
+
     public void approve() {
-        this.status = WithdrawalStatus.WITHDRAWN;
+        transition(WithdrawalStatus.WITHDRAWN);
         application.setStatus(ApplicationStatus.UNSUCCESSFUL);
     }
 
     public void reject() {
-        this.status = WithdrawalStatus.REJECTED;
+        transition(WithdrawalStatus.REJECTED);
+    }
+
+    private void transition(WithdrawalStatus targetStatus) {
+        this.status = targetStatus;
+        this.processedOn = LocalDateTime.now();
+    }
+
+    public void setProcessedBy(CareerCenterStaff processedBy) {
+        this.processedBy = processedBy;
     }
 }

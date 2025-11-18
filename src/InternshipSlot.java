@@ -15,6 +15,9 @@ public class InternshipSlot {
     }
 
     public void assignStudent(Student student) {
+        if (assignedStudent != null) {
+            throw new IllegalStateException("Slot already assigned.");
+        }
         this.assignedStudent = student;
     }
 }

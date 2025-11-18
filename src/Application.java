@@ -5,7 +5,7 @@ public class Application {
     private final Internship internship;
     private ApplicationStatus status = ApplicationStatus.PENDING;
     private final Date timestamp = new Date();
-    private boolean withdrawalRequested;
+    private WithdrawalRequest withdrawalRequest;
 
     public Application(Student student, Internship internship) {
         this.student = student;
@@ -33,7 +33,7 @@ public class Application {
     }
 
     public boolean isWithdrawalRequested() {
-        return withdrawalRequested;
+        return withdrawalRequest != null;
     }
 
     public void markSuccessful() {
@@ -44,8 +44,15 @@ public class Application {
         this.status = ApplicationStatus.UNSUCCESSFUL;
     }
 
+    public WithdrawalRequest getWithdrawalRequest() {
+        return withdrawalRequest;
+    }
+
     public WithdrawalRequest requestWithdrawal(String reason) {
-        this.withdrawalRequested = true;
-        return new WithdrawalRequest(this, student, reason);
+        if (withdrawalRequest != null) {
+            throw new IllegalStateException("Withdrawal already requested.");
+        }
+        withdrawalRequest = new WithdrawalRequest(this, student, reason);
+        return withdrawalRequest;
     }
 }
