@@ -26,13 +26,16 @@ public class ApplicationManager {
     }
 
     public void updateStatus(Application application, ApplicationStatus status) {
+        updateStatus(application, status, false);
+    }
+
+    public void updateStatus(Application application, ApplicationStatus status, boolean confirmOffer) {
         if (application == null || status == null) {
             return;
         }
         application.setStatus(status);
-        if (status == ApplicationStatus.SUCCESSFUL) {
+        if (status == ApplicationStatus.SUCCESSFUL && confirmOffer) {
             assignSlot(application);
-            markOtherApplications(application);
         } else if (status == ApplicationStatus.UNSUCCESSFUL) {
             releaseSlot(application);
         }
@@ -130,12 +133,4 @@ public class ApplicationManager {
         }
     }
 
-    private void markOtherApplications(Application acceptedApplication) {
-        Student student = acceptedApplication.getStudent();
-        for (Application application : student.getApplications()) {
-            if (application != acceptedApplication && application.getStatus() == ApplicationStatus.PENDING) {
-                application.setStatus(ApplicationStatus.UNSUCCESSFUL);
-            }
-        }
-    }
 }

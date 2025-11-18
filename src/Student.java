@@ -43,9 +43,6 @@ public class Student extends User {
         if (application == null || !applications.contains(application)) {
             throw new IllegalArgumentException("Application does not belong to student.");
         }
-        if (application.getStatus() == ApplicationStatus.SUCCESSFUL) {
-            throw new IllegalStateException("Cannot withdraw from an accepted placement.");
-        }
         return manager.submitRequest(application, reason);
     }
 
@@ -62,7 +59,7 @@ public class Student extends User {
                 manager.updateStatus(other, ApplicationStatus.UNSUCCESSFUL);
             }
         }
-        manager.updateStatus(application, ApplicationStatus.SUCCESSFUL);
+        manager.updateStatus(application, ApplicationStatus.SUCCESSFUL, true);
     }
 
     public boolean hasAcceptedPlacement() {

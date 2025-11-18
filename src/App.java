@@ -454,12 +454,13 @@ public class App {
     private void handleStudentWithdrawal(Student student) {
         List<Application> withdrawable = new ArrayList<>();
         for (Application application : student.getApplications()) {
-            if (application.getStatus() == ApplicationStatus.PENDING) {
+            if (application.getStatus() == ApplicationStatus.PENDING
+                    || application.getStatus() == ApplicationStatus.SUCCESSFUL) {
                 withdrawable.add(application);
             }
         }
         if (withdrawable.isEmpty()) {
-            System.out.println("No pending applications available for withdrawal.");
+            System.out.println("No eligible applications available for withdrawal.");
             return;
         }
         Application target = selectApplicationFromList(withdrawable, "Select an application to withdraw (0 to cancel): ");
