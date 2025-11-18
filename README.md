@@ -40,7 +40,7 @@ The system skeleton is in place, but every function still needs to be expanded t
 - `submitInternship`, `approveInternship`, `rejectInternship`, `filter`, `getInternships`: persist opportunities, enforce max-five-per-rep check, manage status transitions (Pending → Approved/Rejected/Filled), and expose filtered lists to students/company reps/career staff.
 
 **ApplicationManager**
-- `submitApplication`: integrate with notifications, enforce rule failures with friendly messages, and log submission timestamps.
+- `submitApplication`: integrate with notifications, enforce rule failures with friendly messages, and record the reasons when submissions fail.
 - `updateStatus`: propagate status changes to students and reps, and auto-fill slots when approvals arrive.
 - `enforceRules`: extend with additional requirements (visibility even after closing if student already applied, ability to view statuses, etc.) and extract messages describing which rule blocked the user.
 
