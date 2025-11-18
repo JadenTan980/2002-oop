@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Scanner;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -174,7 +173,7 @@ public class App {
 
     private void registerStudent() {
         System.out.print("Student ID (e.g., U1234567A): ");
-        String id = scanner.nextLine().trim().toUpperCase(Locale.ROOT);
+        String id = scanner.nextLine().trim().toUpperCase();
         if (!STUDENT_ID_PATTERN.matcher(id).matches()) {
             System.out.println("Invalid ID format.");
             return;
@@ -187,6 +186,15 @@ public class App {
         }
         String password = promptPasswordInput("Password (min 8 chars): ");
         if (password == null) {
+            return;
+        }
+        System.out.print("Email (must end with @ntu.edu.sg): ");
+        String email = scanner.nextLine().trim();
+        String normalizedEmail = email.toLowerCase();
+        if (email.isEmpty()
+                || !EMAIL_PATTERN.matcher(email).matches()
+                || !normalizedEmail.endsWith("@ntu.edu.sg")) {
+            System.out.println("A valid NTU email is required.");
             return;
         }
         Integer year = readInt("Year of Study (1-4, or type 'cancel'): ", 1, 4, null, true);
