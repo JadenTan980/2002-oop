@@ -14,47 +14,38 @@ public class CareerCenterStaff extends User {
         this.staffDepartment = staffDepartment;
     }
 
-    public void approveInternship(Internship internship) {
-        if (internship != null) {
-            internship.setStatus(InternshipStatus.APPROVED);
-        }
-    }
-
-    public void rejectInternship(Internship internship) {
-        if (internship != null) {
-            internship.setStatus(InternshipStatus.REJECTED);
-        }
-    }
-
-    public void approveRepAccount(AccountRequest request) {
-        if (request == null) {
+    public void approveInternship(InternshipManager manager, Internship internship) {
+        if (manager == null || internship == null) {
             return;
         }
-        request.setStatus(AccountRequest.STATUS_APPROVED);
-        request.setApprover(this);
-        if (request.getRep() != null) {
-            request.getRep().setApproved(true);
-        }
+        manager.approveInternship(internship);
     }
 
-    public void rejectRepAccount(AccountRequest request, String notes) {
-        if (request == null) {
+    public void rejectInternship(InternshipManager manager, Internship internship) {
+        if (manager == null || internship == null) {
             return;
         }
-        request.setStatus(AccountRequest.STATUS_REJECTED);
-        request.setApprover(this);
-        request.setDecisionNotes(notes);
+        manager.rejectInternship(internship);
     }
 
-    public void processWithdrawal(WithdrawalRequest request, boolean approve) {
-        if (request == null) {
+    public void approveRepAccount(UserManager manager, AccountRequest request) {
+        if (manager == null || request == null || request.getRep() == null) {
             return;
         }
-        request.setProcessedBy(this);
-        if (approve) {
-            request.approve();
-        } else {
-            request.reject();
+        manager.approveRepresentative(request.getRep().getUserID(), this);
+    }
+
+    public void rejectRepAccount(UserManager manager, AccountRequest request, String notes) {
+        if (manager == null || request == null || request.getRep() == null) {
+            return;
         }
+        manager.rejectRepresentative(request.getRep().getUserID(), this, notes);
+    }
+
+    public void processWithdrawal(WithdrawalManager manager, WithdrawalRequest request, boolean approve) {
+        if (manager == null || request == null) {
+            return;
+        }
+        manager.processRequest(request, this, approve);
     }
 }

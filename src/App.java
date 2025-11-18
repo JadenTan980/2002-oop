@@ -2,6 +2,9 @@ import java.io.Console;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -48,7 +51,8 @@ public class App {
             System.out.println("=== Internship Hub ===");
             System.out.println("1. Login");
             System.out.println("2. Register");
-            System.out.println("3. Quit");
+            System.out.println("3. Reload user data");
+            System.out.println("4. Quit");
             System.out.print("Select an option: ");
             String choice = scanner.nextLine().trim();
             switch (choice) {
@@ -59,7 +63,8 @@ public class App {
                     }
                 }
                 case "2" -> handleRegistration();
-                case "3" -> running = false;
+                case "3" -> reloadData();
+                case "4" -> running = false;
                 default -> System.out.println("Invalid choice. Please try again.");
             }
             System.out.println();
@@ -77,6 +82,11 @@ public class App {
         } catch (IllegalStateException e) {
             System.err.println("Failed to load user data: " + e.getMessage());
         }
+    }
+
+    private void reloadData() {
+        System.out.println("Reloading users from CSV files...");
+        loadInitialUsers();
     }
 
 
@@ -330,6 +340,11 @@ public class App {
         }
     }
 
+    private int readInt(String prompt, int min, int max) {
+        Integer value = readInt(prompt, min, max, null, false);
+        return value == null ? min : value;
+    }
+
     private void persistStudentRecord(String id, String name, String major, int year) {
         String line = String.join(",", id, name, major, String.valueOf(year), "");
         appendCsvLine(studentDataPath, STUDENT_HEADER, line);
@@ -361,27 +376,498 @@ public class App {
     }
 
     public void showStudentMenu(Student student) {
-        System.out.println("Student menu for " + student.getName());
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\n=== Student Portal: " + student.getName() + " ===");
+            System.out.println("1. Browse internships");
+            System.out.println("2. Apply to an internship");
+            System.out.println("3. View my applications");
+            System.out.println("4. Request withdrawal");
+            System.out.println("5. Accept an offer");
+            System.out.println("6. Back to main menu");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
+                case "1" -> displayInternshipCatalog(student);
+                case "2" -> handleStudentApplication(student);
+                case "3" -> showStudentApplications(student);
+                case "4" -> handleStudentWithdrawal(student);
+                case "5" -> handleAcceptOffer(student);
+                case "6" -> exit = true;
+                default -> System.out.println("Unknown option.");
+            }
+        }
+    }
+
+    private void displayInternshipCatalog(Student student) {
         List<Internship> internships = internshipManager.getInternships();
         if (internships.isEmpty()) {
             System.out.println("No internships available yet.");
+            return;
+        }
+        System.out.println("\nAvailable internships:");
+        int index = 1;
+        for (Internship internship : internships) {
+            printInternshipRow(index++, internship);
+        }
+    }
+
+    private void handleStudentApplication(Student student) {
+        if (student.hasAcceptedPlacement()) {
+            System.out.println("You have already accepted a placement and cannot apply for new internships.");
+            return;
+        }
+        List<Internship> available = getInternshipsOpenToStudents(student);
+        if (available.isEmpty()) {
+            System.out.println("No internships currently open for applications.");
+            return;
+        }
+        Internship selection = selectInternshipFromList(available);
+        if (selection == null) {
+            return;
+        }
+        if (student.apply(selection, applicationManager)) {
+            System.out.println("Application submitted for " + selection.getTitle());
         } else {
-            for (Internship internship : internships) {
-                System.out.println("- " + internship.getTitle());
+            String failure = applicationManager.getLastFailureReason();
+            if (!failure.isBlank()) {
+                System.out.println("Unable to apply: " + failure);
             }
         }
-        System.out.println("Returning to main menu.");
+    }
+
+    private void showStudentApplications(Student student) {
+        List<Application> applications = student.getApplications();
+        if (applications.isEmpty()) {
+            System.out.println("No applications submitted yet.");
+            return;
+        }
+        System.out.println("\nYour applications:");
+        int index = 1;
+        for (Application application : applications) {
+            System.out.println(index++ + ". " + application.getInternship().getTitle()
+                    + " (" + application.getInternship().getCompanyName() + ") - "
+                    + application.getStatus());
+        }
+    }
+
+    private void handleStudentWithdrawal(Student student) {
+        List<Application> withdrawable = new ArrayList<>();
+        for (Application application : student.getApplications()) {
+            if (application.getStatus() == ApplicationStatus.PENDING) {
+                withdrawable.add(application);
+            }
+        }
+        if (withdrawable.isEmpty()) {
+            System.out.println("No pending applications available for withdrawal.");
+            return;
+        }
+        Application target = selectApplicationFromList(withdrawable, "Select an application to withdraw (0 to cancel): ");
+        if (target == null) {
+            return;
+        }
+        System.out.print("Reason for withdrawal: ");
+        String reason = scanner.nextLine().trim();
+        try {
+            WithdrawalRequest request = student.withdraw(target, withdrawalManager, reason);
+            System.out.println("Withdrawal requested. Reference: " + request.getRequestedOn());
+        } catch (Exception e) {
+            System.out.println("Unable to request withdrawal: " + e.getMessage());
+        }
+    }
+
+    private void handleAcceptOffer(Student student) {
+        if (student.hasAcceptedPlacement()) {
+            System.out.println("You have already accepted a placement.");
+            return;
+        }
+        List<Application> offers = new ArrayList<>();
+        for (Application application : student.getApplications()) {
+            if (application.getStatus() == ApplicationStatus.SUCCESSFUL) {
+                offers.add(application);
+            }
+        }
+        if (offers.isEmpty()) {
+            System.out.println("No offers available to accept at the moment.");
+            return;
+        }
+        Application target = selectApplicationFromList(offers, "Select an application to accept (0 to cancel): ");
+        if (target == null) {
+            return;
+        }
+        try {
+            student.acceptPlacement(target, applicationManager);
+            System.out.println("Placement accepted for " + target.getInternship().getTitle());
+        } catch (Exception e) {
+            System.out.println("Unable to accept placement: " + e.getMessage());
+        }
     }
 
     public void showRepMenu(CompanyRep rep) {
-        System.out.println("Representative menu for " + rep.getName());
-        System.out.println("Pending account status: " + (rep.isApproved() ? "Approved" : "Awaiting approval"));
-        System.out.println("Returning to main menu.");
+        if (!rep.isApproved()) {
+            System.out.println("Account awaiting approval. Please check back later.");
+            return;
+        }
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\n=== Company Rep Dashboard: " + rep.getName() + " ===");
+            System.out.println("1. View my internships");
+            System.out.println("2. Create a new internship");
+            System.out.println("3. Toggle internship visibility");
+            System.out.println("4. Review applications");
+            System.out.println("5. Back to main menu");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
+                case "1" -> displayRepInternships(rep);
+                case "2" -> handleRepCreateInternship(rep);
+                case "3" -> handleToggleVisibility(rep);
+                case "4" -> handleRepReviewApplications(rep);
+                case "5" -> exit = true;
+                default -> System.out.println("Unknown option.");
+            }
+        }
+    }
+
+    private void displayRepInternships(CompanyRep rep) {
+        List<Internship> mine = internshipManager.getInternshipsForRep(rep);
+        if (mine.isEmpty()) {
+            System.out.println("No internships submitted yet.");
+            return;
+        }
+        System.out.println("\nYour internships:");
+        int index = 1;
+        for (Internship internship : mine) {
+            printInternshipRow(index++, internship);
+        }
+    }
+
+    private void handleRepCreateInternship(CompanyRep rep) {
+        System.out.print("Title: ");
+        String title = scanner.nextLine().trim();
+        if (title.isEmpty()) {
+            System.out.println("Title is required.");
+            return;
+        }
+        System.out.print("Description: ");
+        String description = scanner.nextLine().trim();
+        InternshipLevel level = promptInternshipLevel();
+        System.out.print("Preferred major (leave blank for any): ");
+        String preferredMajor = scanner.nextLine().trim();
+        LocalDate openDate = readOptionalDate("Open date (yyyy-MM-dd, blank for immediate): ");
+        LocalDate closeDate = readOptionalDate("Close date (yyyy-MM-dd, blank for none): ");
+        int slots = readInt("Number of slots (1-10): ", 1, 10);
+        try {
+            Internship internship = rep.createInternship(internshipManager, title, description,
+                    level, preferredMajor, openDate, closeDate, slots);
+            System.out.println("Internship submitted for review: " + internship.getTitle());
+        } catch (Exception e) {
+            System.out.println("Unable to create internship: " + e.getMessage());
+        }
+    }
+
+    private void handleToggleVisibility(CompanyRep rep) {
+        List<Internship> mine = internshipManager.getInternshipsForRep(rep);
+        Internship selection = selectInternshipFromList(mine);
+        if (selection == null) {
+            return;
+        }
+        boolean turnOn = promptYesNo("Turn visibility ON? (y/n): ", selection.isVisible());
+        try {
+            rep.toggleVisibility(internshipManager, selection, turnOn);
+            System.out.println("Visibility updated for " + selection.getTitle());
+        } catch (Exception e) {
+            System.out.println("Unable to change visibility: " + e.getMessage());
+        }
+    }
+
+    private void handleRepReviewApplications(CompanyRep rep) {
+        List<Internship> mine = internshipManager.getInternshipsForRep(rep);
+        Internship selection = selectInternshipFromList(mine);
+        if (selection == null) {
+            return;
+        }
+        List<Application> applications = selection.getApplications();
+        if (applications.isEmpty()) {
+            System.out.println("No applications submitted yet.");
+            return;
+        }
+        System.out.println("\nApplications for " + selection.getTitle() + ":");
+        int index = 1;
+        for (Application application : applications) {
+            System.out.println(index++ + ". " + application.getStudent().getName()
+                    + " - " + application.getStatus());
+        }
+        if (!promptYesNo("Update an application status? (y/n): ", false)) {
+            return;
+        }
+        Application target = selectApplicationFromList(applications, "Select application to update (0 to cancel): ");
+        if (target == null) {
+            return;
+        }
+        System.out.println("1. Pending");
+        System.out.println("2. Successful");
+        System.out.println("3. Unsuccessful");
+        int choice = readInt("Select new status: ", 1, 3);
+        ApplicationStatus status = switch (choice) {
+            case 2 -> ApplicationStatus.SUCCESSFUL;
+            case 3 -> ApplicationStatus.UNSUCCESSFUL;
+            default -> ApplicationStatus.PENDING;
+        };
+        applicationManager.updateStatus(target, status);
+        System.out.println("Application status updated to " + status);
     }
 
     public void showStaffMenu(CareerCenterStaff staff) {
-        System.out.println("Staff menu for " + staff.getName());
-        reportGenerator.generateByStatus(internshipManager.getInternships(), InternshipStatus.APPROVED);
-        System.out.println("Returning to main menu.");
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\n=== Career Center Console: " + staff.getName() + " ===");
+            System.out.println("1. Review company representative accounts");
+            System.out.println("2. Review internship submissions");
+            System.out.println("3. Process withdrawal requests");
+            System.out.println("4. Generate reports");
+            System.out.println("5. Back to main menu");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
+                case "1" -> reviewAccountRequests(staff);
+                case "2" -> reviewInternshipSubmissions(staff);
+                case "3" -> processWithdrawalRequests(staff);
+                case "4" -> showReportsMenu();
+                case "5" -> exit = true;
+                default -> System.out.println("Unknown option.");
+            }
+        }
+    }
+
+    private void reviewAccountRequests(CareerCenterStaff staff) {
+        List<AccountRequest> pending = userManager.getPendingAccounts(1, 100, AccountRequest.STATUS_PENDING);
+        if (pending.isEmpty()) {
+            System.out.println("No pending company representative requests.");
+            return;
+        }
+        System.out.println("\nPending representative accounts:");
+        for (int i = 0; i < pending.size(); i++) {
+            AccountRequest request = pending.get(i);
+            CompanyRep rep = request.getRep();
+            System.out.println((i + 1) + ". " + rep.getName() + " (" + rep.getUserID() + ") - "
+                    + rep.getCompanyName());
+        }
+        int choice = readInt("Select a request to process (0 to cancel): ", 0, pending.size());
+        if (choice == 0) {
+            return;
+        }
+        AccountRequest request = pending.get(choice - 1);
+        if (promptYesNo("Approve this account? (y/n): ", true)) {
+            staff.approveRepAccount(userManager, request);
+            System.out.println("Account approved for " + request.getRep().getUserID());
+        } else {
+            System.out.print("Reason for rejection: ");
+            String notes = scanner.nextLine().trim();
+            staff.rejectRepAccount(userManager, request, notes);
+            System.out.println("Account rejected.");
+        }
+    }
+
+    private void reviewInternshipSubmissions(CareerCenterStaff staff) {
+        List<Internship> pending = new ArrayList<>();
+        for (Internship internship : internshipManager.getInternships()) {
+            if (internship.getStatus() == InternshipStatus.PENDING) {
+                pending.add(internship);
+            }
+        }
+        if (pending.isEmpty()) {
+            System.out.println("No pending internships to review.");
+            return;
+        }
+        System.out.println("\nPending internships:");
+        for (int i = 0; i < pending.size(); i++) {
+            printInternshipRow(i + 1, pending.get(i));
+        }
+        int choice = readInt("Select an internship to review (0 to cancel): ", 0, pending.size());
+        if (choice == 0) {
+            return;
+        }
+        Internship target = pending.get(choice - 1);
+        if (promptYesNo("Approve this internship? (y/n): ", true)) {
+            staff.approveInternship(internshipManager, target);
+            System.out.println("Internship approved.");
+        } else {
+            staff.rejectInternship(internshipManager, target);
+            System.out.println("Internship rejected.");
+        }
+    }
+
+    private void processWithdrawalRequests(CareerCenterStaff staff) {
+        List<WithdrawalRequest> requests = withdrawalManager.getPendingRequests();
+        if (requests.isEmpty()) {
+            System.out.println("No withdrawal requests pending.");
+            return;
+        }
+        System.out.println("\nWithdrawal requests:");
+        for (int i = 0; i < requests.size(); i++) {
+            WithdrawalRequest request = requests.get(i);
+            System.out.println((i + 1) + ". " + request.getStudent().getName()
+                    + " - " + request.getApplication().getInternship().getTitle()
+                    + " | Reason: " + request.getReason());
+        }
+        int choice = readInt("Select a request to process (0 to cancel): ", 0, requests.size());
+        if (choice == 0) {
+            return;
+        }
+        WithdrawalRequest target = requests.get(choice - 1);
+        boolean approve = promptYesNo("Approve this withdrawal? (y/n): ", true);
+        staff.processWithdrawal(withdrawalManager, target, approve);
+        System.out.println("Withdrawal request processed.");
+    }
+
+    private void showReportsMenu() {
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\n=== Reports ===");
+            System.out.println("1. By status");
+            System.out.println("2. By preferred major");
+            System.out.println("3. By internship level");
+            System.out.println("4. Company summary");
+            System.out.println("5. Back");
+            System.out.print("Choice: ");
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
+                case "1" -> runStatusReport();
+                case "2" -> runMajorReport();
+                case "3" -> runLevelReport();
+                case "4" -> runCompanyReport();
+                case "5" -> exit = true;
+                default -> System.out.println("Unknown option.");
+            }
+        }
+    }
+
+    private void runStatusReport() {
+        InternshipStatus status = promptStatusSelection();
+        reportGenerator.generateByStatus(internshipManager.getInternships(), status);
+    }
+
+    private void runMajorReport() {
+        System.out.print("Preferred major: ");
+        String major = scanner.nextLine().trim();
+        if (major.isEmpty()) {
+            System.out.println("Major cannot be empty.");
+            return;
+        }
+        reportGenerator.generateByMajor(internshipManager.getInternships(), major);
+    }
+
+    private void runLevelReport() {
+        InternshipLevel level = promptInternshipLevel();
+        reportGenerator.generateByLevel(internshipManager.getInternships(), level);
+    }
+
+    private void runCompanyReport() {
+        System.out.print("Company name: ");
+        String company = scanner.nextLine().trim();
+        if (company.isEmpty()) {
+            System.out.println("Company cannot be empty.");
+            return;
+        }
+        reportGenerator.generateCompanySummary(internshipManager.getInternships(), company);
+    }
+
+    private List<Internship> getInternshipsOpenToStudents(Student student) {
+        List<Internship> available = new ArrayList<>();
+        String studentMajor = student.getMajor();
+        int studentYear = student.getYearOfStudy();
+        for (Internship internship : internshipManager.getInternships()) {
+            if (internship.getStatus() != InternshipStatus.APPROVED || !internship.isVisible() || internship.isFull()) {
+                continue;
+            }
+            String preferredMajor = internship.getPreferredMajor();
+            if (preferredMajor != null && !preferredMajor.isBlank()
+                    && studentMajor != null && !preferredMajor.equalsIgnoreCase(studentMajor)) {
+                continue;
+            }
+            InternshipLevel level = internship.getLevel();
+            if (studentYear <= 2 && level != null && level != InternshipLevel.BASIC) {
+                continue;
+            }
+            available.add(internship);
+        }
+        return available;
+    }
+
+    private Internship selectInternshipFromList(List<Internship> internships) {
+        if (internships == null || internships.isEmpty()) {
+            System.out.println("No internships to select.");
+            return null;
+        }
+        for (int i = 0; i < internships.size(); i++) {
+            printInternshipRow(i + 1, internships.get(i));
+        }
+        int choice = readInt("Select an internship (0 to cancel): ", 0, internships.size());
+        if (choice == 0) {
+            return null;
+        }
+        return internships.get(choice - 1);
+    }
+
+    private Application selectApplicationFromList(List<Application> applications, String prompt) {
+        if (applications == null || applications.isEmpty()) {
+            System.out.println("No applications available.");
+            return null;
+        }
+        for (int i = 0; i < applications.size(); i++) {
+            Application app = applications.get(i);
+            System.out.println((i + 1) + ". " + app.getInternship().getTitle()
+                    + " - " + app.getStatus());
+        }
+        int choice = readInt(prompt, 0, applications.size());
+        if (choice == 0) {
+            return null;
+        }
+        return applications.get(choice - 1);
+    }
+
+    private LocalDate readOptionalDate(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                return null;
+            }
+            try {
+                return LocalDate.parse(input);
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Use yyyy-MM-dd.");
+            }
+        }
+    }
+
+    private InternshipLevel promptInternshipLevel() {
+        InternshipLevel[] levels = InternshipLevel.values();
+        for (int i = 0; i < levels.length; i++) {
+            System.out.println((i + 1) + ". " + levels[i]);
+        }
+        int choice = readInt("Select internship level: ", 1, levels.length);
+        return levels[choice - 1];
+    }
+
+    private InternshipStatus promptStatusSelection() {
+        InternshipStatus[] statuses = InternshipStatus.values();
+        for (int i = 0; i < statuses.length; i++) {
+            System.out.println((i + 1) + ". " + statuses[i]);
+        }
+        int choice = readInt("Select a status: ", 1, statuses.length);
+        return statuses[choice - 1];
+    }
+
+    private void printInternshipRow(int index, Internship internship) {
+        int totalSlots = internship.getSlots().size();
+        long filledSlots = internship.getSlots().stream().filter(slot -> slot.getAssignedStudent() != null).count();
+        System.out.println(index + ". " + internship.getTitle() + " (" + internship.getCompanyName() + ")"
+                + " | Status: " + internship.getStatus()
+                + " | Level: " + internship.getLevel()
+                + " | Major: " + (internship.getPreferredMajor() == null ? "Any" : internship.getPreferredMajor())
+                + " | Visibility: " + (internship.isVisible() ? "On" : "Off")
+                + " | Slots: " + filledSlots + "/" + totalSlots);
     }
 }

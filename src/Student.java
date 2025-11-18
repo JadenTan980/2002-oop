@@ -32,7 +32,6 @@ public class Student extends User {
         try {
             return manager.submitApplication(this, internship) != null;
         } catch (IllegalStateException e) {
-            System.out.println("Application failed: " + e.getMessage());
             return false;
         }
     }
