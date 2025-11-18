@@ -86,7 +86,7 @@ public class UserManager {
         if (password == null || password.trim().length() < 8) {
             return false;
         }
-        if (year < 1 || year > 6) {
+        if (year < 1 || year > 4) {
             return false;
         }
         Student student = new Student(id.trim(), name.trim(), password, year, major == null ? "" : major.trim());
