@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class App {
@@ -391,7 +392,7 @@ public class App {
     }
 
     private void displayInternshipCatalog(Student student) {
-        List<Internship> internships = internshipManager.getInternships();
+        List<Internship> internships = fetchFilteredInternships(student, null);
         if (internships.isEmpty()) {
             System.out.println("No internships available yet.");
             return;
@@ -524,7 +525,7 @@ public class App {
     }
 
     private void displayRepInternships(CompanyRep rep) {
-        List<Internship> mine = internshipManager.getInternshipsForRep(rep);
+        List<Internship> mine = fetchFilteredInternships(rep, internship -> internship.getRepInCharge() == rep);
         if (mine.isEmpty()) {
             System.out.println("No internships submitted yet.");
             return;
@@ -878,6 +879,94 @@ public class App {
         }
         int choice = readInt("Select a status: ", 1, statuses.length);
         return statuses[choice - 1];
+    }
+
+    private List<Internship> fetchFilteredInternships(User user, Predicate<Internship> additionalFilter) {
+        FilterCriteria criteria = promptFilterCriteria(user);
+        List<Internship> internships = internshipManager.filter(criteria);
+        if (additionalFilter == null) {
+            return internships;
+        }
+        List<Internship> filtered = new ArrayList<>();
+        for (Internship internship : internships) {
+            if (additionalFilter.test(internship)) {
+                filtered.add(internship);
+            }
+        }
+        return filtered;
+    }
+
+    private FilterCriteria promptFilterCriteria(User user) {
+        if (user == null) {
+            return null;
+        }
+        FilterCriteria saved = user.getFilterPreferences();
+        if (saved != null && hasFilterValues(saved)) {
+            System.out.println("Saved filters: " + describeFilterCriteria(saved));
+            if (promptYesNo("Use saved filters? (y/n): ", true)) {
+                return saved;
+            }
+        }
+        if (!promptYesNo("Apply filters to this list? (y/n): ", false)) {
+            return null;
+        }
+        FilterCriteria criteria = new FilterCriteria();
+        if (promptYesNo("Filter by status? (y/n): ", false)) {
+            criteria.setStatus(promptStatusSelection());
+        }
+        System.out.print("Filter by preferred major (leave blank for any): ");
+        String major = scanner.nextLine().trim();
+        if (!major.isEmpty()) {
+            criteria.setPreferredMajor(major);
+        }
+        if (promptYesNo("Filter by internship level? (y/n): ", false)) {
+            criteria.setLevel(promptInternshipLevel());
+        }
+        if (promptYesNo("Filter by closing date? (y/n): ", false)) {
+            LocalDate closingDate = readOptionalDate("Latest closing date (yyyy-MM-dd, blank to cancel): ");
+            if (closingDate != null) {
+                criteria.setClosingDate(closingDate);
+            }
+        }
+        if (!hasFilterValues(criteria)) {
+            System.out.println("No filters applied. Showing all internships.");
+            return null;
+        }
+        if (promptYesNo("Save these filters for future sessions? (y/n): ", true)) {
+            user.setFilterPreferences(criteria);
+        }
+        return criteria;
+    }
+
+    private boolean hasFilterValues(FilterCriteria criteria) {
+        if (criteria == null) {
+            return false;
+        }
+        if (criteria.getStatus() != null || criteria.getLevel() != null || criteria.getClosingDate() != null) {
+            return true;
+        }
+        String preferredMajor = criteria.getPreferredMajor();
+        return preferredMajor != null && !preferredMajor.isBlank();
+    }
+
+    private String describeFilterCriteria(FilterCriteria criteria) {
+        if (criteria == null) {
+            return "(none)";
+        }
+        List<String> parts = new ArrayList<>();
+        if (criteria.getStatus() != null) {
+            parts.add("Status=" + criteria.getStatus());
+        }
+        if (criteria.getPreferredMajor() != null && !criteria.getPreferredMajor().isBlank()) {
+            parts.add("Major=" + criteria.getPreferredMajor());
+        }
+        if (criteria.getLevel() != null) {
+            parts.add("Level=" + criteria.getLevel());
+        }
+        if (criteria.getClosingDate() != null) {
+            parts.add("Closing on/before " + criteria.getClosingDate());
+        }
+        return parts.isEmpty() ? "(none)" : String.join(", ", parts);
     }
 
     private void printInternshipRow(int index, Internship internship) {
