@@ -1,10 +1,7 @@
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Student extends User {
-    private static final int MAX_ACTIVE_APPLICATIONS = 3;
-
     private final int yearOfStudy;
     private final String major;
     private final List<Application> applications = new ArrayList<>();
@@ -28,37 +25,45 @@ public class Student extends User {
         return applications;
     }
 
-    public boolean apply(Internship internship) {
-        if (internship == null || !isEligibleForInternship(internship)) {
+    public boolean apply(Internship internship, ApplicationManager manager) {
+        if (manager == null) {
+            throw new IllegalArgumentException("Application manager required.");
+        }
+        try {
+            return manager.submitApplication(this, internship) != null;
+        } catch (IllegalStateException e) {
+            System.out.println("Application failed: " + e.getMessage());
             return false;
         }
-        Application application = new Application(this, internship);
-        applications.add(application);
-        internship.addApplication(application);
-        return true;
     }
 
-    public void withdraw(Application application) {
+    public WithdrawalRequest withdraw(Application application, WithdrawalManager manager, String reason) {
+        if (manager == null) {
+            throw new IllegalArgumentException("Withdrawal manager required.");
+        }
         if (application == null || !applications.contains(application)) {
-            return;
+            throw new IllegalArgumentException("Application does not belong to student.");
         }
         if (application.getStatus() == ApplicationStatus.SUCCESSFUL) {
             throw new IllegalStateException("Cannot withdraw from an accepted placement.");
         }
-        application.setStatus(ApplicationStatus.UNSUCCESSFUL);
+        return manager.submitRequest(application, reason);
     }
 
-    public void acceptPlacement(Application application) {
+    public void acceptPlacement(Application application, ApplicationManager manager) {
         if (application == null || !applications.contains(application)) {
             throw new IllegalArgumentException("Application does not belong to student.");
         }
-        application.markSuccessful();
+        if (manager == null) {
+            throw new IllegalArgumentException("Application manager required.");
+        }
         acceptedPlacement = application;
         for (Application other : applications) {
             if (other != application && other.getStatus() == ApplicationStatus.PENDING) {
-                other.setStatus(ApplicationStatus.UNSUCCESSFUL);
+                manager.updateStatus(other, ApplicationStatus.UNSUCCESSFUL);
             }
         }
+        manager.updateStatus(application, ApplicationStatus.SUCCESSFUL);
     }
 
     public boolean hasAcceptedPlacement() {
@@ -69,48 +74,4 @@ public class Student extends User {
         return acceptedPlacement;
     }
 
-    private boolean isEligibleForInternship(Internship internship) {
-        if (hasAcceptedPlacement()) {
-            return false;
-        }
-        if (getActiveApplicationsCount() >= MAX_ACTIVE_APPLICATIONS) {
-            return false;
-        }
-        for (Application application : applications) {
-            if (application.getInternship() == internship) {
-                return false;
-            }
-        }
-        if (internship.getStatus() != InternshipStatus.APPROVED) {
-            return false;
-        }
-        if (!internship.isVisible()) {
-            return false;
-        }
-        String preferredMajor = internship.getPreferredMajor();
-        if (preferredMajor != null && !preferredMajor.isBlank()
-                && major != null && !preferredMajor.equalsIgnoreCase(major)) {
-            return false;
-        }
-        InternshipLevel level = internship.getLevel();
-        if (yearOfStudy <= 2 && level != null && level != InternshipLevel.BASIC) {
-            return false;
-        }
-        LocalDate today = LocalDate.now();
-        LocalDate openDate = internship.getOpenDate();
-        if (openDate != null && today.isBefore(openDate)) {
-            return false;
-        }
-        LocalDate closeDate = internship.getCloseDate();
-        if (closeDate != null && today.isAfter(closeDate)) {
-            return false;
-        }
-        return !internship.isFull();
-    }
-
-    private long getActiveApplicationsCount() {
-        return applications.stream()
-                .filter(app -> app.getStatus() == ApplicationStatus.PENDING)
-                .count();
-    }
 }

@@ -20,4 +20,8 @@ public class InternshipSlot {
         }
         this.assignedStudent = student;
     }
+
+    public void release() {
+        this.assignedStudent = null;
+    }
 }
