@@ -185,7 +185,7 @@ public class App {
         if (password == null) {
             return;
         }
-        Integer year = readInt("Year of Study (1-6, or type 'cancel'): ", 1, 6, null, true);
+        Integer year = readInt("Year of Study (1-4, or type 'cancel'): ", 1, 4, null, true);
         if (year == null) {
             System.out.println("Registration cancelled.");
             return;
@@ -328,11 +328,6 @@ public class App {
                 System.out.println("Please enter a number between " + min + " and " + max + ".");
             }
         }
-    }
-
-    private int readInt(String prompt, int min, int max) {
-        Integer value = readInt(prompt, min, max, null, false);
-        return value == null ? min : value;
     }
 
     private void persistStudentRecord(String id, String name, String major, int year) {
