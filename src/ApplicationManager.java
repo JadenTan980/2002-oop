@@ -45,72 +45,70 @@ public class ApplicationManager {
     }
 
     public boolean enforceRules(Student student, Internship internship) {
-        lastFailureReason = "";
-        String violation = evaluateRules(student, internship);
-        if (violation != null) {
-            lastFailureReason = violation;
+        if (student == null || internship == null) {
+            lastFailureReason = "Student and internship are required.";
             return false;
         }
-        return true;
-    }
-
-    public String getLastFailureReason() {
-        return lastFailureReason;
-    }
-
-    public List<String> getSubmissionNotifications() {
-        return Collections.unmodifiableList(submissionNotifications);
-    }
-
-    private String evaluateRules(Student student, Internship internship) {
-        if (student == null || internship == null) {
-            return "Student and internship are required.";
-        }
         if (internship.getStatus() != InternshipStatus.APPROVED) {
-            return "Internship has not been approved yet.";
+            lastFailureReason = "Internship has not been approved yet.";
+            return false;
         }
         if (!internship.isVisible()) {
-            return "Internship is currently hidden.";
+            lastFailureReason = "Internship is currently hidden.";
+            return false;
         }
         String preferredMajor = internship.getPreferredMajor();
         String studentMajor = student.getMajor();
         if (preferredMajor != null && !preferredMajor.isBlank()
                 && studentMajor != null && !preferredMajor.equalsIgnoreCase(studentMajor)) {
-            return "Major does not match the preferred major for this internship.";
+            lastFailureReason = "Major does not match the preferred major for this internship.";
+            return false;
         }
         InternshipLevel level = internship.getLevel();
         if (student.getYearOfStudy() <= 2 && level != null && level != InternshipLevel.BASIC) {
-            return "Lower-year students may only apply for BASIC level internships.";
+            lastFailureReason = "Lower-year students may only apply for BASIC level internships.";
+            return false;
         }
         LocalDate today = LocalDate.now();
         LocalDate openDate = internship.getOpenDate();
         if (openDate != null && today.isBefore(openDate)) {
-            return "Internship is not open for applications yet.";
+            lastFailureReason = "Internship is not open for applications yet.";
+            return false;
         }
         LocalDate closeDate = internship.getCloseDate();
         if (closeDate != null && today.isAfter(closeDate)) {
-            return "Internship is already closed.";
+            lastFailureReason = "Internship is already closed.";
+            return false;
         }
         long activeCount = student.getApplications().stream()
                 .filter(app -> app.getStatus() == ApplicationStatus.PENDING
                         || app.getStatus() == ApplicationStatus.SUCCESSFUL)
                 .count();
         if (activeCount >= MAX_ACTIVE_APPLICATIONS) {
-            return "Maximum of " + MAX_ACTIVE_APPLICATIONS + " active applications reached.";
+            lastFailureReason = "Maximum of " + MAX_ACTIVE_APPLICATIONS + " active applications reached.";
+            return false;
         }
         for (Application application : student.getApplications()) {
             if (application.getInternship() == internship
                     && application.getStatus() != ApplicationStatus.UNSUCCESSFUL) {
-                return "You have already applied for this internship.";
+                lastFailureReason = "You have already applied for this internship.";
+                return false;
             }
         }
         if (student.hasAcceptedPlacement()) {
-            return "You have already accepted a placement.";
+            lastFailureReason = "You have already accepted a placement.";
+            return false;
         }
         if (internship.isFull()) {
-            return "Internship slots have been filled.";
+            lastFailureReason = "Internship slots have been filled.";
+            return false;
         }
-        return null;
+        lastFailureReason = "";
+        return true;
+    }
+
+    public String getLastFailureReason() {
+        return lastFailureReason;
     }
 
     private void assignSlot(Application application) {
@@ -140,8 +138,8 @@ public class ApplicationManager {
     private void markOtherApplications(Application acceptedApplication) {
         Student student = acceptedApplication.getStudent();
         for (Application application : student.getApplications()) {
-            if (application != acceptedApplication) {
-                application.setStatus(ApplicationStatus.WITHDRAWN);
+            if (application != acceptedApplication && application.getStatus() == ApplicationStatus.PENDING) {
+                application.setStatus(ApplicationStatus.UNSUCCESSFUL);
             }
         }
     }
