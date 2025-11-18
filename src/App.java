@@ -76,7 +76,6 @@ public class App {
         File companyCsv = new File(companyDataPath);
         try {
             userManager.loadAllUsers(studentCsv, staffCsv, companyCsv);
-            System.out.println("Users loaded from configured CSV files.");
         } catch (IllegalStateException e) {
             System.err.println("Failed to load user data: " + e.getMessage());
         }

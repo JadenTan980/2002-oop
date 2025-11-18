@@ -96,7 +96,8 @@ public class ApplicationManager {
             return "Maximum of " + MAX_ACTIVE_APPLICATIONS + " active applications reached.";
         }
         for (Application application : student.getApplications()) {
-            if (application.getInternship() == internship) {
+            if (application.getInternship() == internship
+                    && application.getStatus() != ApplicationStatus.UNSUCCESSFUL) {
                 return "You have already applied for this internship.";
             }
         }

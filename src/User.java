@@ -10,7 +10,6 @@ public abstract class User {
         this.userID = userID;
         this.name = name;
         this.password = (password == null || password.isBlank()) ? DEFAULT_PASSWORD : password;
-        System.out.println("Account created for user " + userID);
     }
 
     public String getUserID() {

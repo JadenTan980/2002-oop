@@ -47,6 +47,9 @@ public class CompanyRep extends User {
         if (manager == null) {
             throw new IllegalArgumentException("Internship manager required.");
         }
+        if (internships.size() >= MAX_INTERNSHIPS) {
+            throw new IllegalStateException("Maximum number of internships (" + MAX_INTERNSHIPS + ") reached.");
+        }
         if (slotCount < 1 || slotCount > MAX_SLOTS) {
             throw new IllegalArgumentException("Slot count must be between 1 and " + MAX_SLOTS);
         }
